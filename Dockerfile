@@ -1,6 +1,6 @@
 FROM golang:1.17-alpine as build-env
 
-ENV APP_NAME fdk-harvest-admin
+ENV APP_NAME catalog-history-service
 ENV CMD_PATH main.go
 
 COPY . $GOPATH/src/$APP_NAME

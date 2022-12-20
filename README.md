@@ -9,12 +9,16 @@ To run the catalog history service locally, you will need to have Go (version 1.
 To start the service, follow these steps:
 
 Run `go get` to install the required dependencies.
-Run `go run` main.go to start the service.
+Run `go run main.go` to start the service.
 
 ```shell
 go get
 go run main.go
 ```
+
+To start the service with docker-compose:
+
+Run `docker-compose up -d --build` to start the service and build the required images.
 
 ### Testing
 

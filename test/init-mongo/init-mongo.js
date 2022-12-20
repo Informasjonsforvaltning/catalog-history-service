@@ -1,4 +1,4 @@
-db = db.getSiblingDB('fdk-harvest-admin');
+db = db.getSiblingDB('catalog-history-service');
 db.createCollection('datasources');
 db.datasources.insert([
     {
