@@ -40,6 +40,6 @@ To check that the service is running, you can send a GET request to the /ping en
 
 ```shell
 curl -X 'GET' \
-  'localhost:8000/ping' \
+  'localhost:8080/ping' \
   -H 'accept: application/json'
 ```

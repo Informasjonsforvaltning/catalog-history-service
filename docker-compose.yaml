@@ -2,13 +2,14 @@ version: "3"
 services:
 
   catalog-history-service:
+    build: .
     image: eu.gcr.io/digdir-fdk-infra/catalog-history-service
     environment:
       - MONGO_USERNAME=admin
       - MONGO_PASSWORD=admin
       - MONGO_HOST=mongodb:27017
     ports:
-      - "8080:8080"
+      - "9090:8080"
     depends_on:
       - mongodb
 
