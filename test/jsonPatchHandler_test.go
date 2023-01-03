@@ -20,7 +20,7 @@ type Book struct {
 
 func TestApplyJSONPatch(t *testing.T) {
 	// create a client to connect to the MongoDB server
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://172.19.0.2:27017"))
 	if err != nil {
 		t.Fatal(err)
 	}
