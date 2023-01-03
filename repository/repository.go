@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,36 +11,46 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
 )
 
-type DataSourceRepository struct {
+type JsonPatchRepository struct {
 	collection *mongo.Collection
 }
 
-var dataSourceRepository *DataSourceRepository
+var jsonPatchRepository *JsonPatchRepository
 
-func InitRepository() *DataSourceRepository {
-	if dataSourceRepository == nil {
-		dataSourceRepository = &DataSourceRepository{collection: connection.MongoCollection()}
+func InitRepository() *JsonPatchRepository {
+	if jsonPatchRepository == nil {
+		jsonPatchRepository = &JsonPatchRepository{collection: connection.MongoCollection()}
 	}
-	return dataSourceRepository
+	return jsonPatchRepository
 }
 
-func (r *DataSourceRepository) GetAllDataSources(ctx context.Context) ([]model.DataSource, error) {
-	current, err := r.collection.Find(ctx, bson.D{})
+// ApplyJSONPatch applies a JSON Patch to a mock JSON document stored in a MongoDB collection
+func (r *JsonPatchRepository) ApplyJSONPatch(ctx context.Context, patch []byte) error {
+	// create a mock JSON document
+	book := model.Book{
+		Title:  "Mock Book",
+		Author: "John Doe",
+		Year:   2020,
+	}
+
+	// insert the mock JSON document into the collection
+	_, err := r.collection.InsertOne(ctx, book)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer current.Close(ctx)
-	var dataSources []model.DataSource
-	for current.Next(ctx) {
-		var dataSource model.DataSource
-		err := bson.Unmarshal(current.Current, &dataSource)
-		if err != nil {
-			return nil, err
-		}
-		dataSources = append(dataSources, dataSource)
+
+	// apply the JSON Patch document to the mock JSON document
+	var updatedBook model.Book
+	err = json.Unmarshal(patch, &updatedBook)
+	if err != nil {
+		return err
 	}
-	if err := current.Err(); err != nil {
-		return nil, err
+
+	// update the stored document in the collection with the patched document
+	_, err = r.collection.UpdateOne(ctx, bson.M{"title": "Mock Book"}, bson.M{"$set": updatedBook})
+	if err != nil {
+		return err
 	}
-	return dataSources, nil
+
+	return nil
 }

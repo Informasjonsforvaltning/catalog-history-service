@@ -2,52 +2,66 @@ package test
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
-	"time"
 
-	"github.com/Informasjonsforvaltning/catalog-history-service/handlers"
+	"github.com/Informasjonsforvaltning/catalog-history-service/model"
+	"github.com/Informasjonsforvaltning/catalog-history-service/repository"
+	"github.com/Informasjonsforvaltning/catalog-history-service/service"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// import the Book struct from jsonPatchHandler.go
-type Book struct {
-	Title  string `json:"title"`
-	Author string `json:"author"`
-	Year   int    `json:"year"`
-}
-
 func TestApplyJSONPatch(t *testing.T) {
-	// create a client to connect to the MongoDB server
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://172.19.0.2:27017"))
-	if err != nil {
-		t.Fatal(err)
+	// create a new gin router and context
+	router := gin.Default()
+	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+
+	// create a new service and repository
+	service := service.InitService()
+	repository := repository.InitRepository()
+
+	// create a mock JSON document
+	book := model.Book{
+		Title:  "Mock Book",
+		Author: "John Doe",
+		Year:   2020,
 	}
 
-	// create a context for the database operations
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// insert the mock JSON document into the collection
+	_, err := repository.collection.InsertOne(context.Background(), book)
+	assert.NoError(t, err)
 
-	// call the ApplyJSONPatch function
-	err = handlers.ApplyJSONPatch(ctx, client)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// create a JSON Patch document to update the "title" field of the mock JSON document
+	patch, err := json.Marshal([]struct {
+		Op    string `json:"op"`
+		Path  string `json:"path"`
+		Value string `json:"value"`
+	}{{
+		Op:    "replace",
+		Path:  "/title",
+		Value: "Updated Title",
+	}})
+	assert.NoError(t, err)
 
-	// retrieve the updated document from the collection
-	collection := client.Database("test").Collection("books")
-	var result Book
-	err = collection.FindOne(ctx, bson.M{"title": "Updated Title"}).Decode(&result)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// create a request to apply the JSON Patch
+	req, err := http.NewRequest("PATCH", "/", strings.NewReader(string(patch)))
+	assert.NoError(t, err)
 
-	// assert that the "title" field has been updated
-	if result.Title != "Updated Title" {
-		t.Errorf("Expected title to be 'Updated Title', got '%s'", result.Title)
-	}
+	// apply the JSON Patch
+	router.PATCH("/", service.ApplyJSONPatch)
+	router.ServeHTTP(ctx.Writer, req)
 
-	// disconnect the client
-	client.Disconnect(ctx)
+	// check that the status code is 200
+	assert.Equal(t, http.StatusOK, ctx.Writer.Status())
+
+	// check that the mock JSON document has been updated
+	var updatedBook model.Book
+	err = repository.collection.FindOne(context.Background(), bson.M{"title": "Updated Title"}).Decode(&updatedBook)
+	assert.NoError(t, err)
+	assert.Equal(t, "Updated Title", updatedBook.Title)
 }

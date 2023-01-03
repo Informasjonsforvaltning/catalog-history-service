@@ -2,38 +2,41 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"time"
 
-	"github.com/Informasjonsforvaltning/catalog-history-service/config"
-	"github.com/Informasjonsforvaltning/catalog-history-service/handlers"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/Informasjonsforvaltning/catalog-history-service/config/connection"
+	"github.com/Informasjonsforvaltning/catalog-history-service/repository"
+	"github.com/Informasjonsforvaltning/catalog-history-service/service"
+	"github.com/gin-gonic/gin"
 )
 
+// define a struct to hold the mock JSON document
+type Book struct {
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Year   int    `json:"year"`
+}
+
 func main() {
-	config.LoggerSetup()
+	// create a new gin router
+	router := gin.Default()
 
-	router := config.SetupRouter()
-	router.Run(":9091")
+	// create a new service and repository
+	service := service.InitService()
+	repository := repository.InitRepository()
 
-	// create a client to connect to the MongoDB server
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Disconnect(context.TODO())
+	// apply a JSON Patch to a mock JSON document stored in a MongoDB collection
+	router.PATCH("/", func(c *gin.Context) {
+		if err := service.ApplyJSONPatch(context.Background(), connection.MongoClient()); err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"status": "success"})
+	})
 
-	// create a context for the database operations
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// get all data sources from the repository
+	router.GET("/datasources", repository.GetAllDataSources)
 
-	// call the function from jsonPatchHandler.go
-	err = handlers.ApplyJSONPatch(ctx, client)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("JSON patch applied successfully!")
+	// start the server
+	log.Fatal(router.Run())
 }
