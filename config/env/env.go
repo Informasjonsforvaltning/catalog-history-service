@@ -35,12 +35,12 @@ type Paths struct {
 
 var ConstantValues = Constants{
 	MongoAuthParams: "authSource=admin&authMechanism=SCRAM-SHA-1",
-	MongoCollection: "datasources",
+	MongoCollection: "begreper",
 	MongoDatabase:   "catalog-history-service",
 }
 
 var PathValues = Paths{
-	Datasources: "datasources",
+	Datasources: "begreper",
 	Ping:        "ping",
 	Ready:       "ready",
 }

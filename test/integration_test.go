@@ -36,27 +36,23 @@ func TestReadyRoute(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestGetDataSourcesRoute(t *testing.T) {
+func TestBegrep(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/datasources", nil)
+	req, _ := http.NewRequest("GET", "/begrep", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var expectedResponse []model.DataSource
-	expectedResponse = append(expectedResponse, model.DataSource{
-		Id:                "test-id",
-		DataSourceType:    "DCAT-AP-NO",
-		DataType:          "dataset",
-		Url:               "http://url.com",
-		AcceptHeaderValue: "text/turtle",
-		PublisherId:       "123456789",
-		Description:       "test source",
+	var expectedResponse []model.Begrep
+	expectedResponse = append(expectedResponse, model.Begrep{
+		ID:   "someID",
+		Term: "someTerm",
+		Def:  "someDef",
 	})
 
-	var actualResponse []model.DataSource
+	var actualResponse []model.Begrep
 	err := json.Unmarshal(w.Body.Bytes(), &actualResponse)
 
 	assert.Nil(t, err)
