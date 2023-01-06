@@ -28,7 +28,7 @@ type Constants struct {
 }
 
 type Paths struct {
-	Datasources string
+	Concepts string
 	Ping        string
 	Ready       string
 }
@@ -40,7 +40,7 @@ var ConstantValues = Constants{
 }
 
 var PathValues = Paths{
-	Datasources: "begreper",
+	Concepts: "begreper",
 	Ping:        "ping",
 	Ready:       "ready",
 }
