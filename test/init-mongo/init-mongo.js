@@ -1,6 +1,6 @@
 db = db.getSiblingDB('catalog-history-service');
-db.createCollection('begreper');
-db.datasources.insert([
+db.createCollection('concepts');
+db.concepts.insert([
     {
         "_id": "test-id",
         "term": "someTerm",
