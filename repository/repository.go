@@ -10,7 +10,7 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
 )
 
-// JsonPatchRepository is a struct that holds a reference to a MongoDB collection
+// BegreperRepository is a struct that holds a reference to a MongoDB collection
 type BegreperRepository struct {
 	collection *mongo.Collection
 }
