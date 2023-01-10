@@ -29,18 +29,18 @@ type Constants struct {
 
 type Paths struct {
 	Concepts string
-	Ping        string
-	Ready       string
+	Ping     string
+	Ready    string
 }
 
 var ConstantValues = Constants{
 	MongoAuthParams: "authSource=admin&authMechanism=SCRAM-SHA-1",
-	MongoCollection: "begreper",
+	MongoCollection: "concepts",
 	MongoDatabase:   "catalog-history-service",
 }
 
 var PathValues = Paths{
 	Concepts: "begreper",
-	Ping:        "ping",
-	Ready:       "ready",
+	Ping:     "ping",
+	Ready:    "ready",
 }
