@@ -1,0 +1,40 @@
+name: Deploy to staging
+
+on:
+  pull_request:
+    types: [ready_for_review, opened, reopened, synchronize]
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.19.4
+      - name: Test
+        run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./test
+      - uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.txt
+
+  build-and-deploy-staging:
+    needs: run-tests
+    name: Call reusable workflow when pull request is created
+    if: github.event.pull_request.draft == false
+    uses: Informasjonsforvaltning/workflows/.github/workflows/build-deploy.yaml@main
+    with:
+      app_name: catalog-history-service
+      environment: 'staging'
+      cluster: 'digdir-fdk-dev'
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GCP_SA_DIGDIR_FDK_GCR_KEY: ${{ secrets.GCP_SA_DIGDIR_FDK_GCR_KEY }}
+      DIGDIR_FDK_AUTODEPLOY: ${{ secrets.DIGDIR_FDK_DEV_AUTODEPLOY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
