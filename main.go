@@ -16,18 +16,18 @@ func main() {
 	router.Run(":8080")
 	router.Run(":9091")
 
-	begreperRepository := repository.InitRepository()
+	conceptsRepository := repository.InitRepository()
 
-	begrep := model.Begrep{
+	concept := model.Concept{
 		ID:   1,
 		Term: "someTerm",
 		Def:  "someDef",
 	}
 
-	begrepID, err := begreperRepository.InsertBegrep(context.TODO(), begrep)
+	conceptID, err := conceptsRepository.InsertConcept(context.TODO(), concept)
 	if err != nil {
 		// handle error
 	}
 
-	fmt.Println("Inserted begrep with ID:", begrepID)
+	fmt.Println("Inserted concept with ID:", conceptID)
 }

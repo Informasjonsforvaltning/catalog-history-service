@@ -10,23 +10,23 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
 )
 
-// BegreperRepository is a struct that holds a reference to a MongoDB collection
-type BegreperRepository struct {
+// conceptsRepository is a struct that holds a reference to a MongoDB collection
+type ConceptsRepository struct {
 	collection *mongo.Collection
 }
 
-var begreperRepository *BegreperRepository
+var conceptsRepository *ConceptsRepository
 
-func InitRepository() *BegreperRepository {
-	if begreperRepository == nil {
-		begreperRepository = &BegreperRepository{collection: connection.MongoCollection()}
+func InitRepository() *ConceptsRepository {
+	if conceptsRepository == nil {
+		conceptsRepository = &ConceptsRepository{collection: connection.MongoCollection()}
 	}
-	return begreperRepository
+	return conceptsRepository
 }
 
-func (repository *BegreperRepository) InsertBegrep(ctx context.Context, begrep model.Begrep) (string, error) {
-	// Insert the begrep document into the collection
-	result, err := repository.collection.InsertOne(ctx, begrep)
+func (repository *ConceptsRepository) InsertConcept(ctx context.Context, concept model.Concept) (string, error) {
+	// Insert the concept document into the collection
+	result, err := repository.collection.InsertOne(ctx, concept)
 	if err != nil {
 		return "", err
 	}

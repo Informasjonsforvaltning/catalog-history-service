@@ -40,7 +40,7 @@ var ConstantValues = Constants{
 }
 
 var PathValues = Paths{
-	Concepts: "begreper",
+	Concepts: "concepts",
 	Ping:     "ping",
 	Ready:    "ready",
 }
