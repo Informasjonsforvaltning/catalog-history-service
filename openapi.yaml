@@ -1,0 +1,180 @@
+openapi: 3.0.2
+info:
+  title: Catalog history service
+  description: desc
+  version: '1.0'
+  termsOfService: 'https://fellesdatakatalog.digdir.no/about'
+  contact:
+    name: Digitaliseringsdirektoratet
+    url: 'https://fellesdatakatalog.digdir.no'
+    email: fellesdatakatalog@digdir.no
+  license:
+    name: License of API
+    url: 'http://data.norge.no/nlod/no/2.0'
+externalDocs:
+  description: Dokumentasjon på Informasjonsforvaltning GitHub
+  url: https://informasjonsforvaltning.github.io/
+tags:
+  - name: catalog-history-service
+    description: Catalog history service
+servers:
+  - url: 'https://catalog-history.fellesdatakatalog.digdir.no'
+paths:
+  /concepts/{conceptId}:
+    post:
+      tags:
+        - catalog-history-service
+      summary: Add update to concept
+      description: Adds update to concept history
+      operationId: update
+      parameters:
+        - name: conceptId
+          in: path
+          description: concept id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: No content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Update'
+    get:
+      tags:
+        - catalog-history-service
+      summary: Query for update history.
+      description: Returns a collection of updates
+      operationId: getHistory
+      parameters:
+        - name: conceptId
+          in: path
+          description: concept id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdateMeta'
+  /concepts/{conceptId}/{updateId}:
+    get:
+      tags:
+        - catalog-history-service
+      description: Get update diff
+      operationId: getUpdateDiff
+      parameters:
+        - name: conceptId
+          in: path
+          description: concept id
+          required: true
+          schema:
+            type: string
+        - name: updateId
+          in: path
+          description: update id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateDiff'
+
+components:
+  schemas:
+    Update:
+      type: object
+      description: Json patch update and meta data regarding update
+      properties:
+        person:
+          $ref: "#/components/schemas/Person"
+          description: Person who updated the document 
+        datetime:
+          type: string
+          format: date
+          description: date of update
+        jsonPatch:
+          $ref: "#/components/schemas/JsonPatchOperation"
+          description: Update in json patch format
+
+    UpdateDiff:
+      type: object
+      description: Pre and post diff
+      properties:
+        pre:
+          type: object
+          description: Document before update
+        post:
+          type: object
+          description: Document after update
+
+    UpdateMeta:
+      type: object
+      description: Meta data regarding update
+      properties:
+        id:
+          type: string
+          description: update id
+        person:
+          $ref: "#/components/schemas/Person"
+          description: Person who updated the document 
+        datetime:
+          type: string
+          format: date
+          description: date of update
+
+    Person:
+      type: object
+      description:
+        Person
+      properties:
+        id:
+          type: string
+          description: sso id
+        email:
+          type: string
+          description: email
+        name:
+          type: string
+          description: full name
+
+    JsonPatchOperation:
+      type: object
+      description: 'A JSON patch document as defined by RFC 6902'
+      required:
+        - op
+        - path
+      properties:
+        op:
+          type: string
+          nullable: false
+          description: 'The operation to be performed'
+          enum:
+            - add
+            - remove
+            - replace
+            - move
+            - copy
+            - test
+        path:
+          type: string
+          nullable: false
+          description: 'A JSON pointer to the property being affected'
+        value:
+          type: object
+          description: 'The value to add, replace or test.'
+        from:
+          description: 'A JSON Pointer path pointing to the location to move/copy from.'
+          type: string
