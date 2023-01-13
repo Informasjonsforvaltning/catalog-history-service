@@ -105,9 +105,11 @@ components:
           type: string
           format: date
           description: date of update
-        jsonPatch:
-          $ref: "#/components/schemas/JsonPatchOperation"
-          description: Update in json patch format
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/JsonPatchOperation'
+          description: List of operations defining the update
 
     UpdateDiff:
       type: object
