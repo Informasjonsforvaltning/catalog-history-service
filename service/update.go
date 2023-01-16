@@ -19,6 +19,8 @@ type Person struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
+type UpdateService struct {
+}
 
 type JsonPatchOperation struct {
 	Op    string `json:"op"`
@@ -52,4 +54,8 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Update stored"))
+}
+
+func NewUpdateService() *UpdateService {
+	return &UpdateService{}
 }

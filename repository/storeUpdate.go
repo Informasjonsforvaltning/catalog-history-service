@@ -15,6 +15,9 @@ type UpdateRepository interface {
 type UpdateRepositoryImpl struct {
 	collection *mongo.Collection
 }
+type UpdateService struct {
+	UpdateRepository UpdateRepository
+}
 
 var updateRepository *UpdateRepositoryImpl
 
@@ -25,7 +28,12 @@ func InitUpdateRepository() *UpdateRepositoryImpl {
 	return updateRepository
 }
 
-func (r *UpdateRepositoryImpl) StoreUpdate(ctx context.Context, update model.Update) error {
-	_, err := r.collection.InsertOne(ctx, update)
-	return err
+func NewUpdateService(r UpdateRepository) *UpdateService {
+	return &UpdateService{
+		UpdateRepository: r,
+	}
+}
+
+func (s *UpdateService) StoreUpdate(ctx context.Context, update model.Update) error {
+	return s.UpdateRepository.StoreUpdate(ctx, update)
 }
