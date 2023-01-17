@@ -29,7 +29,7 @@ func NewUpdateHandler(us service.UpdateService) http.HandlerFunc {
 			return
 		}
 		update.DateTime = time.Now()
-		if err := service.NewUpdateService().StoreUpdate(r.Context(), update); err != nil {
+		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return

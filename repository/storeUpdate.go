@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/connection"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
@@ -28,12 +30,27 @@ func InitUpdateRepository() *UpdateRepositoryImpl {
 	return updateRepository
 }
 
-func NewUpdateService(r UpdateRepository) *UpdateService {
-	return &UpdateService{
-		UpdateRepository: r,
-	}
+func (r *UpdateRepositoryImpl) createUpdate(ctx context.Context, update model.Update) error {
+	_, err := r.collection.InsertOne(ctx, update, nil)
+	return err
 }
 
-func (s *UpdateService) StoreUpdate(ctx context.Context, update model.Update) error {
-	return s.UpdateRepository.StoreUpdate(ctx, update)
+func CreateUpdate(w http.ResponseWriter, r *http.Request) {
+	var update model.Update
+	err := json.NewDecoder(r.Body).Decode(&update)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	//validating the update struct
+	if update.Person.ID == "" || update.Person.Email == "" || update.Person.Name == "" || update.DateTime.IsZero() {
+		http.Error(w, "Invalid Payload", http.StatusBadRequest)
+		return
+	}
+	err = InitUpdateRepository().createUpdate(r.Context(), update)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }
