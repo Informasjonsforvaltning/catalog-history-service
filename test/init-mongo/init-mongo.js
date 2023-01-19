@@ -7,19 +7,3 @@ db.concepts.insert([
         "def": "someDef",
     }
 ]);
-
-// Create a variable to hold the update struct
-var update = {
-    patches: [
-        {
-            "op": "replace",
-            "path": "/term",
-            "value": "newTerm"
-        },
-        {
-            "op": "replace",
-            "path": "/def",
-            "value": "newDef"
-        }
-    ]
-};

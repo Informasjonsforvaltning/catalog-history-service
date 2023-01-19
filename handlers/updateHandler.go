@@ -2,39 +2,48 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
-	"github.com/Informasjonsforvaltning/catalog-history-service/service"
+
+	jsonpatch "github.com/evanphx/json-patch"
 )
 
-func NewUpdateHandler(us service.UpdateService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var update model.Update
-		err := json.NewDecoder(r.Body).Decode(&update)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		if update.Person.ID == "" || update.Person.Email == "" || update.Person.Name == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Person must be set"))
-			return
-		}
-		if len(update.Operations) == 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Operations must be set"))
-			return
-		}
-		update.DateTime = time.Now()
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Update stored"))
+func UpdateJsonPatch(w http.ResponseWriter, r *http.Request) {
+	original := &model.Update{
+		Person: model.Person{
+			ID:    "123",
+			Email: "emaill",
+			Name:  "name",
+		},
+		DateTime: time.Now(),
+		Operations: []model.JsonPatchOperation{
+			{
+				Op:    "replace",
+				Path:  "/name",
+				Value: "Jane",
+			},
+			{
+				Op:   "remove",
+				Path: "/height",
+			},
+		},
 	}
+
+	originalBytes, err := json.Marshal(original)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(originalBytes))
+	request, err := ioutil.ReadAll(r.Body)
+	fmt.Println(string(request))
+	patchedJson, err := jsonpatch.MergePatch(originalBytes, request)
+	fmt.Println(string(patchedJson))
+
+	w.Write(patchedJson)
+	w.Header().Set("Content-Type", "application/json")
 }
