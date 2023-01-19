@@ -1,17 +1,9 @@
 package model
 
-import "time"
-
 type Concept struct {
 	ID   int    `bson:"_id"`
 	Term string `bson:"term"`
 	Def  string `bson:"def"`
-}
-
-type Update struct {
-	Person     Person               `json:"person"`
-	DateTime   time.Time            `json:"datetime"`
-	Operations []JsonPatchOperation `json:"operations"`
 }
 
 type Person struct {

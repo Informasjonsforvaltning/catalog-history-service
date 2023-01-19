@@ -1,11 +1,13 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
-	"net/http"
 	"time"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
+	"github.com/Informasjonsforvaltning/catalog-history-service/repository"
+	"github.com/sirupsen/logrus"
 )
 
 type Update struct {
@@ -19,43 +21,39 @@ type Person struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
-type UpdateService struct {
-}
-
 type JsonPatchOperation struct {
 	Op    string `json:"op"`
 	Path  string `json:"path"`
 	Value string `json:"value"`
 }
-
-func StoreUpdate(w http.ResponseWriter, r *http.Request) {
-	var update model.Update
-	err := json.NewDecoder(r.Body).Decode(&update)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	if update.Person.ID == "" || update.Person.Email == "" || update.Person.Name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Person must be set"))
-		return
-	}
-	if len(update.Operations) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Operations must be set"))
-		return
-	}
-	update.DateTime = time.Now()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Update stored"))
+type UpdateService interface {
+	StoreUpdate(ctx context.Context, bytes []byte)
 }
 
-func NewUpdateService() *UpdateService {
-	return &UpdateService{}
+type UpdateServiceImp struct {
+	ConceptsRepository repository.ConceptsRepositoryImp
+}
+
+func InitService() *UpdateServiceImp {
+	service := UpdateServiceImp{
+		ConceptsRepository: *repository.InitRepository(),
+	}
+	return &service
+}
+
+func (service *UpdateServiceImp) StoreUpdate(ctx context.Context, bytes []byte) error {
+	var update model.Update
+	err := json.Unmarshal(bytes, &update)
+	logrus.Info("Called StoreUpdate")
+	if err != nil {
+		logrus.Info("Marshal failed")
+		return err
+	}
+	err = update.Validate()
+	if err != nil {
+		logrus.Info("Validation failed")
+		return err
+	}
+	logrus.Info("Validated update")
+	return service.ConceptsRepository.StoreConcept(ctx, update)
 }

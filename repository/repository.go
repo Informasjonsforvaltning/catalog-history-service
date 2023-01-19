@@ -3,34 +3,33 @@ package repository
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/connection"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
 )
 
+type ConceptsRepository interface {
+	StoreConcept(ctx context.Context, concept model.Concept) error
+}
+
 // conceptsRepository is a struct that holds a reference to a MongoDB collection
-type ConceptsRepository struct {
+type ConceptsRepositoryImp struct {
 	collection *mongo.Collection
 }
 
-var conceptsRepository *ConceptsRepository
+var conceptsRepository *ConceptsRepositoryImp
 
-func InitRepository() *ConceptsRepository {
+func InitRepository() *ConceptsRepositoryImp {
 	if conceptsRepository == nil {
-		conceptsRepository = &ConceptsRepository{collection: connection.MongoCollection()}
+		conceptsRepository = &ConceptsRepositoryImp{collection: connection.MongoCollection()}
 	}
 	return conceptsRepository
 }
 
-func (repository *ConceptsRepository) InsertConcept(ctx context.Context, concept model.Concept) (string, error) {
-	// Insert the concept document into the collection
-	result, err := repository.collection.InsertOne(ctx, concept)
-	if err != nil {
-		return "", err
-	}
-
-	// Return the inserted document's ID
-	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.Update) error {
+	_, err := r.collection.InsertOne(ctx, update, nil)
+	logrus.Info("Stored update: ")
+	return err
 }
