@@ -10,7 +10,7 @@ import (
 )
 
 type ConceptsRepository interface {
-	StoreConcept(ctx context.Context, concept model.Concept) error
+	StoreConcept(ctx context.Context, update model.Update) error
 }
 
 // conceptsRepository is a struct that holds a reference to a MongoDB collection
