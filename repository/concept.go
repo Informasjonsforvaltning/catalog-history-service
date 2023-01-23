@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/connection"
@@ -30,6 +29,5 @@ func InitRepository() *ConceptsRepositoryImp {
 
 func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.Update) error {
 	_, err := r.collection.InsertOne(ctx, update, nil)
-	logrus.Info("Stored update: ")
 	return err
 }

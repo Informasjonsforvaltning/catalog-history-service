@@ -12,7 +12,7 @@ func InitializeRoutes(e *gin.Engine) {
 
 	e.GET(env.PathValues.Ping, handlers.PingHandler())
 	e.GET(env.PathValues.Ready, handlers.ReadyHandler())
-	e.POST(env.PathValues.Concepts, handlers.CreateDataSourceHandler())
+	e.POST(env.PathValues.Concepts, handlers.ConceptUpdateHandler())
 }
 
 func SetupRouter() *gin.Engine {

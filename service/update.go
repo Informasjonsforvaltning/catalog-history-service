@@ -41,19 +41,17 @@ func InitService() *UpdateServiceImp {
 	return &service
 }
 
-func (service *UpdateServiceImp) StoreUpdate(ctx context.Context, bytes []byte) error {
+func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte) error {
 	var update model.Update
 	err := json.Unmarshal(bytes, &update)
-	logrus.Info("Called StoreUpdate")
 	if err != nil {
-		logrus.Info("Marshal failed")
+		logrus.Error("Unable to unmarshal concept update")
 		return err
 	}
 	err = update.Validate()
 	if err != nil {
-		logrus.Info("Validation failed")
+		logrus.Error("Concept update is not valid")
 		return err
 	}
-	logrus.Info("Validated update")
 	return service.ConceptsRepository.StoreConcept(ctx, update)
 }
