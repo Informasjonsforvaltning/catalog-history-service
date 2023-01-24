@@ -6,6 +6,7 @@ import (
 )
 
 type Update struct {
+	ID         string               `json:"id" bson:"id"`
 	Person     Person               `json:"person"`
 	DateTime   time.Time            `json:"datetime"`
 	Operations []JsonPatchOperation `json:"operations"`
