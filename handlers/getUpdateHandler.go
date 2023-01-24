@@ -25,7 +25,7 @@ func GetAllHandler() func(c *gin.Context) {
 func GetUpdateHandler() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {
-		id := c.Param("id")
+		id := c.Param("conceptId")
 		logrus.Infof("Get concept update with id: %s", id)
 
 		concept, status := service.GetConceptUpdate(c.Request.Context(), id)

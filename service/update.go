@@ -26,7 +26,7 @@ func InitService() *UpdateServiceImp {
 	return &service
 }
 
-func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte) error {
+func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte, conceptId string) error {
 	var update model.Update
 	err := json.Unmarshal(bytes, &update)
 	if err != nil {
@@ -38,13 +38,14 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 		logrus.Error("Concept update is not valid")
 		return err
 	}
+	update.ID = conceptId
 	return service.ConceptsRepository.StoreConcept(ctx, update)
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, id *string) (*[]*model.Update, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId *string) (*[]*model.Update, int) {
 	query := bson.D{}
-	if id != nil {
-		query = append(query, bson.E{Key: "id", Value: id})
+	if conceptId != nil {
+		query = append(query, bson.E{Key: "id", Value: conceptId})
 	}
 	conceptUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query)
 	if err != nil {
@@ -59,8 +60,8 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, id *stri
 }
 
 // function to get a update from database
-func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, id string) (*model.Update, int) {
-	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, id)
+func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string) (*model.Update, int) {
+	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId)
 	if err != nil {
 		logrus.Error("Unable to get concept update")
 		return nil, http.StatusInternalServerError

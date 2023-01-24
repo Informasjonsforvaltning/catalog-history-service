@@ -35,6 +35,7 @@ func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.U
 	_, err := r.collection.InsertOne(ctx, update, nil)
 	return err
 }
+
 func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.Update, error) {
 	current, err := r.collection.Find(ctx, query)
 	logrus.Info("Starting GetConceptUpdates")
@@ -58,8 +59,8 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 	return updates, nil
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, id string) (*model.Update, error) {
-	filter := bson.D{{Key: "id", Value: id}}
+func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string) (*model.Update, error) {
+	filter := bson.D{{Key: "id", Value: conceptId}}
 	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
 	logrus.Info("Starting to get concept update from database")
 
