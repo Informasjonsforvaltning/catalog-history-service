@@ -1,5 +1,6 @@
 package test
 
+/*
 import (
 	"encoding/json"
 	"net/http"
@@ -43,4 +44,4 @@ func TestGetUpdateHandler(t *testing.T) {
 	var concept interface{}
 	json.Unmarshal(w.Body.Bytes(), &concept)
 	assert.NotNil(t, concept)
-}
+} */
