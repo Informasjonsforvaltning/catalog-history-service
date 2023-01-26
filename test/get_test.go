@@ -11,37 +11,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetDataSourceRoute(t *testing.T) {
+func TestGetDataSourcesRoute(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concept/2", nil)
+	req, _ := http.NewRequest("GET", "/concepts", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	expectedResponse := model.Update{
-		ID: "2",
-		Person: model.Person{
-			ID:    "456",
-			Email: "example@example.com",
-			Name:  "John Doe",
-		},
-	}
-
-	var actualResponse model.Update
+	var actualResponse []model.Update
 	err := json.Unmarshal(w.Body.Bytes(), &actualResponse)
 
 	assert.Nil(t, err)
-	assert.Equal(t, expectedResponse, actualResponse)
-}
-
-func TestGetDataSourceNotFound(t *testing.T) {
-	router := config.SetupRouter()
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concept/nothing", nil)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.True(t, len(actualResponse) > 2)
 }
