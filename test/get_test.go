@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetDataSourcesRoute(t *testing.T) {
+func TestGetConcepts(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
