@@ -15,6 +15,10 @@ import (
 
 var dbClient *mongo.Client
 
+func TestMain(m *testing.M) {
+	MongoContainerRunner(m)
+}
+
 func MongoContainerRunner(m *testing.M) {
 	pool, err := dockertest.NewPool("")
 	if err != nil {

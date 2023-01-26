@@ -65,15 +65,18 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId s
 	logrus.Info("Starting to get concept update from database")
 
 	if err == mongo.ErrNoDocuments {
+		logrus.Error("concept update not found in db")
 		return nil, nil
 	}
 	if err != nil {
+		logrus.Errorf("error when getting concept from db: %s", err)
 		return nil, err
 	}
 
 	var update model.Update
 	unmarshalError := bson.Unmarshal(bytes, &update)
 	if unmarshalError != nil {
+		logrus.Errorf("error when unmarshalling concept from db: %s", unmarshalError)
 		return nil, unmarshalError
 	}
 
