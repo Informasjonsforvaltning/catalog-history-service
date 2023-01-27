@@ -50,7 +50,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	}
 	err = service.ConceptsRepository.StoreConcept(ctx, updateDbo)
 	if err != nil {
-		logrus.Error("Could not store concept update")
+		logrus.Error("Could not store concept update" + err.Error())
 		return nil, err
 	}
 	return &updateDbo.ID, nil
