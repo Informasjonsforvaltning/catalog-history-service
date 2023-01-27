@@ -31,6 +31,7 @@ func InitService() *UpdateServiceImp {
 func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte, conceptId string) (*string, error) {
 	var update model.UpdateDto
 	err := json.Unmarshal(bytes, &update)
+	logrus.Info("Unmarshalled update")
 	if err != nil {
 		logrus.Error("Unable to unmarshal concept update")
 		return nil, err

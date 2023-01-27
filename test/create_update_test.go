@@ -36,7 +36,7 @@ func TestCreateUpdate(t *testing.T) {
 	}
 
 	body, _ := json.Marshal(toBeCreated)
-	req, _ := http.NewRequest("POST", "/concepts/123456789", bytes.NewReader(body))
+	req, _ := http.NewRequest("POST", "/concepts/123456789", bytes.NewBuffer(body))
 	router.ServeHTTP(w, req)
 	location, _ := w.Result().Location()
 
