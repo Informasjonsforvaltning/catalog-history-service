@@ -12,9 +12,9 @@ import (
 )
 
 type ConceptsRepository interface {
-	StoreConcept(ctx context.Context, update model.Update) error
-	GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.Update, error)
-	GetConceptUpdate(ctx context.Context, id string) (*model.Update, error)
+	StoreConcept(ctx context.Context, update model.UpdateDbo) error
+	GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.UpdateDbo, error)
+	GetConceptUpdate(ctx context.Context, id string) (*model.UpdateDbo, error)
 }
 
 // conceptsRepository is a struct that holds a reference to a MongoDB collection
@@ -31,21 +31,21 @@ func InitRepository() *ConceptsRepositoryImp {
 	return conceptsRepository
 }
 
-func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.Update) error {
+func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.UpdateDbo) error {
 	_, err := r.collection.InsertOne(ctx, update, nil)
 	return err
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.Update, error) {
+func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.UpdateDbo, error) {
 	current, err := r.collection.Find(ctx, query)
 	logrus.Info("Starting GetConceptUpdates")
 	if err != nil {
 		return nil, err
 	}
 	defer current.Close(ctx)
-	var updates []*model.Update
+	var updates []*model.UpdateDbo
 	for current.Next(ctx) {
-		var update model.Update
+		var update model.UpdateDbo
 		err := bson.Unmarshal(current.Current, &update)
 		if err != nil {
 			return nil, err
@@ -59,7 +59,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 	return updates, nil
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string) (*model.Update, error) {
+func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string) (*model.UpdateDbo, error) {
 	filter := bson.D{{Key: "id", Value: conceptId}}
 	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
 	logrus.Info("Starting to get concept update from database")
@@ -73,7 +73,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId s
 		return nil, err
 	}
 
-	var update model.Update
+	var update model.UpdateDbo
 	unmarshalError := bson.Unmarshal(bytes, &update)
 	if unmarshalError != nil {
 		logrus.Errorf("error when unmarshalling concept from db: %s", unmarshalError)

@@ -19,9 +19,10 @@ func PostConceptUpdate() func(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, err.Error())
 		} else {
-			err := service.StoreConceptUpdate(c.Request.Context(), bytes, c.Param("conceptId"))
+			newId, err := service.StoreConceptUpdate(c.Request.Context(), bytes, c.Param("conceptId"))
 			if err == nil {
-				c.JSON(http.StatusOK, gin.H{"status": "ok"})
+				c.Writer.Header().Add("Location", "/concepts/"+*newId)
+				c.JSON(http.StatusCreated, nil)
 			} else {
 				c.JSON(http.StatusInternalServerError, err.Error())
 			}
