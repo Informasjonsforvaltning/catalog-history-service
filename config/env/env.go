@@ -42,7 +42,7 @@ var ConstantValues = Constants{
 
 var PathValues = Paths{
 	Concept:  "/concepts/:conceptId",
-	Concepts: "/concepts",
+	ConceptUpdate: "/concepts/:conceptId/:updateId",
 	Ping:     "ping",
 	Ready:    "ready",
 }
