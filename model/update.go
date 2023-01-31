@@ -6,7 +6,7 @@ import (
 )
 
 type UpdateDbo struct {
-	ID         string               `json:"_id"`
+	ID         string               `json:"id"`
 	ResourceId string               `json:"resourceId"`
 	Person     Person               `json:"person"`
 	DateTime   time.Time            `json:"datetime"`
