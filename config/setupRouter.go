@@ -10,7 +10,7 @@ import (
 func InitializeRoutes(e *gin.Engine) {
 	e.SetTrustedProxies(nil)
 	e.POST(env.PathValues.Concept, handlers.PostConceptUpdate())
-	e.GET(env.PathValues.ConceptUpdate, handlers.GetConceptUpdateHandler())
+	e.GET(env.PathValues.Concept, handlers.GetConceptUpdateHandler())
 	e.GET(env.PathValues.Concept, handlers.GetConceptUpdatesHandler())
 }
 

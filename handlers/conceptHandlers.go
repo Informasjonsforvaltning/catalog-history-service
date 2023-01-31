@@ -8,6 +8,36 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func GetConceptUpdatesHandler() func(c *gin.Context) {
+	service := service.InitService()
+	return func(c *gin.Context) {
+		logrus.Info("Getting all concepts")
+
+		concepts, status := service.GetConceptUpdates(c.Request.Context(), nil)
+		if status == http.StatusOK {
+			c.JSON(status, concepts)
+		} else {
+			c.Status(status)
+		}
+	}
+}
+
+func GetConceptUpdateHandler() func(c *gin.Context) {
+	service := service.InitService()
+	return func(c *gin.Context) {
+		conceptId := c.Param("conceptId")
+		updateId := c.Param("updateId")
+		logrus.Infof("Get concept update with id: %s", conceptId)
+
+		concept, status := service.GetConceptUpdate(c.Request.Context(), conceptId, updateId)
+		if status == http.StatusOK {
+			c.JSON(status, concept)
+		} else {
+			c.Status(status)
+		}
+	}
+}
+
 func PostConceptUpdate() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {

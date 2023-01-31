@@ -86,8 +86,8 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 }
 
 // function to get a update from database
-func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, updateId string) (*model.UpdateDbo, int) {
-	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, updateId)
+func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.UpdateDbo, int) {
+	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId)
 	if err != nil {
 		logrus.Error("Unable to get concept update")
 		return nil, http.StatusInternalServerError
