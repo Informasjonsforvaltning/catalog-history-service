@@ -15,7 +15,7 @@ func TestGetConcepts(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concepts/123456789/123", nil)
+	req, _ := http.NewRequest("GET", "/concepts/123456789", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)

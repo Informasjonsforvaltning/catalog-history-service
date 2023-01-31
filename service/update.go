@@ -56,11 +56,9 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId *string) (*[]*model.UpdateMeta, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string) (*[]*model.UpdateMeta, int) {
 	query := bson.D{}
-	if conceptId != nil {
-		query = append(query, bson.E{Key: "resourceId", Value: conceptId})
-	}
+	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
 	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query)
 	if err != nil {
 		logrus.Error("Get concept updates failed")

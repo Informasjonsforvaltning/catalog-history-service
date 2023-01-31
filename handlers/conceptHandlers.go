@@ -11,9 +11,9 @@ import (
 func GetConceptUpdatesHandler() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {
-		logrus.Info("Getting all concepts")
-
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), nil)
+		conceptId := c.Param("conceptId")
+		logrus.Info("Getting all updates for concepts with id: %s", conceptId)
+		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId)
 		if status == http.StatusOK {
 			c.JSON(status, concepts)
 		} else {
