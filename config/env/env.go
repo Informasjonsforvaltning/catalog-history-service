@@ -28,9 +28,10 @@ type Constants struct {
 }
 
 type Paths struct {
-	Concepts string
-	Ping     string
-	Ready    string
+	Concept       string
+	ConceptUpdate string
+	Ping          string
+	Ready         string
 }
 
 var ConstantValues = Constants{
@@ -40,7 +41,8 @@ var ConstantValues = Constants{
 }
 
 var PathValues = Paths{
-	Concepts: "/concepts/:conceptId",
-	Ping:     "ping",
-	Ready:    "ready",
+	Concept:       "/concepts/:conceptId",
+	ConceptUpdate: "/concepts/:conceptId/:updateId",
+	Ping:          "/ping",
+	Ready:         "/ready",
 }
