@@ -6,16 +6,16 @@ import (
 )
 
 type UpdateDbo struct {
-	ID         string               `json:"id"`
-	ResourceId string               `json:"resourceId"`
-	Person     Person               `json:"person"`
-	DateTime   time.Time            `json:"datetime"`
-	Operations []JsonPatchOperation `json:"operations"`
+	ID         string               `json:"id" bson:"id"`
+	ResourceId string               `json:"resourceId" bson:"resourceId"`
+	Person     Person               `json:"person" bson:"person"`
+	DateTime   time.Time            `json:"datetime" bson:"datetime"`
+	Operations []JsonPatchOperation `json:"operations" bson:"operations"`
 }
 
 type UpdateDto struct {
-	Person     Person               `json:"person"`
-	Operations []JsonPatchOperation `json:"operations"`
+	Person     Person               `json:"person" bson:"person"`
+	Operations []JsonPatchOperation `json:"operations" bson:"operations"`
 }
 
 func (update UpdateDto) Validate() error {
@@ -26,22 +26,22 @@ func (update UpdateDto) Validate() error {
 }
 
 type Person struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
+	ID    string `json:"id" bson:"id"`
+	Email string `json:"email" bson:"email"`
+	Name  string `json:"name" bson:"name"`
 }
 
 type JsonPatchOperation struct {
-	Op    string `json:"op"`
-	Path  string `json:"path"`
-	Value string `json:"value"`
+	Op    string `json:"op" bson:"op"`
+	Path  string `json:"path" bson:"path"`
+	Value string `json:"value" bson:"value"`
 }
 
 type UpdateMeta struct {
-	ID         string    `json:"id"`
-	ResourceId string    `json:"resourceId"`
-	DateTime   time.Time `json:"datetime"`
-	Person     Person    `json:"person"`
+	ID         string    `json:"id" bson:"id"`
+	ResourceId string    `json:"resourceId" bson:"resourceId"`
+	DateTime   time.Time `json:"datetime" bson:"datetime"`
+	Person     Person    `json:"person" bson:"person"`
 }
 
 type UpdateDiff struct {
