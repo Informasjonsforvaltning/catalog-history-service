@@ -14,6 +14,7 @@ func InitializeRoutes(e *gin.Engine) {
 	e.POST(env.PathValues.Concept, handlers.PostConceptUpdate())
 	e.GET(env.PathValues.Concept, handlers.GetConceptUpdatesHandler())
 	e.GET(env.PathValues.ConceptUpdate, handlers.GetConceptUpdateHandler())
+	e.GET(env.PathValues.ConceptDiff, handlers.GetConceptDiffHandler())
 }
 
 func SetupRouter() *gin.Engine {

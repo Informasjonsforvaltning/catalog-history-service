@@ -45,5 +45,6 @@ type UpdateMeta struct {
 }
 
 type UpdateDiff struct {
-	ResourceId string `json:"resourceId"`
+	ResourceId string               `json:"resourceId"`
+	Operations []JsonPatchOperation `json:"operations"`
 }

@@ -21,6 +21,10 @@ type UpdateServiceImp struct {
 	ConceptsRepository repository.ConceptsRepositoryImp
 }
 
+type DiffServiceImp struct {
+	ConceptsRepository repository.ConceptsRepositoryImp
+}
+
 func InitService() *UpdateServiceImp {
 	service := UpdateServiceImp{
 		ConceptsRepository: *repository.InitRepository(),
@@ -94,5 +98,22 @@ func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId
 		return nil, http.StatusNotFound
 	} else {
 		return conceptUpdate, http.StatusOK
+	}
+}
+
+// function to get a diff from database
+func (service *UpdateServiceImp) GetConceptUpdateDiff(ctx context.Context, conceptId string, updateId string) (*model.UpdateDiff, int) {
+	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId)
+	if err != nil {
+		logrus.Error("Unable to get concept update")
+		return nil, http.StatusInternalServerError
+	} else if conceptUpdate == nil {
+		logrus.Error("Concept update not found")
+		return nil, http.StatusNotFound
+	} else {
+		return &model.UpdateDiff{
+			ResourceId: conceptUpdate.ResourceId,
+			Operations: conceptUpdate.Operations,
+		}, http.StatusOK
 	}
 }
