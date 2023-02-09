@@ -63,6 +63,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string) (*[]*model.UpdateMeta, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
+	query = append(query, bson.E{Key: "datetime", Value: bson.M{"$lt": time.Now()}})
 	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
@@ -107,13 +108,48 @@ func (service *UpdateServiceImp) GetConceptUpdateDiff(ctx context.Context, conce
 	if err != nil {
 		logrus.Error("Unable to get concept update")
 		return nil, http.StatusInternalServerError
-	} else if conceptUpdate == nil {
+	}
+	if conceptUpdate == nil {
 		logrus.Error("Concept update not found")
 		return nil, http.StatusNotFound
-	} else {
-		return &model.UpdateDiff{
-			ResourceId: conceptUpdate.ResourceId,
-			Operations: conceptUpdate.Operations,
-		}, http.StatusOK
 	}
+	query := bson.D{}
+	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
+	query = append(query, bson.E{Key: "datetime", Value: bson.M{"$lt": conceptUpdate.DateTime}})
+	databaseUpdates, listErr := service.ConceptsRepository.GetConceptUpdates(ctx, query)
+	if listErr != nil {
+		logrus.Error("Get concept updates failed")
+		return nil, http.StatusInternalServerError
+	}
+	concept, err := service.BuildConceptFromPatches(databaseUpdates)
+	if err != nil {
+		logrus.Error("Unable to build concept from patches")
+		logrus.Error(err)
+		return nil, http.StatusInternalServerError
+
+	}
+	return &model.UpdateDiff{
+		ResourceId: conceptUpdate.ResourceId,
+		Operations: conceptUpdate.Operations,
+		Resource:   string(concept),
+	}, http.StatusOK
+}
+
+func (service *UpdateServiceImp) BuildConceptFromPatches(databaseUpdates []*model.UpdateDbo) ([]byte, error) {
+	concept := []byte("{}")
+	var err error
+
+	for _, update := range databaseUpdates {
+		if update == nil {
+			logrus.Warning("Update is nil")
+		} else {
+			logrus.Info("Update: " + update.ID)
+			concept, err = applyPatchesToResource(concept, *update)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return concept, nil
+
 }

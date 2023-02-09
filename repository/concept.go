@@ -83,34 +83,3 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId s
 
 	return &update, nil
 }
-
-// GetConceptDiff returns the diff between the current and previous version of a concept
-func (r ConceptsRepositoryImp) GetConceptDiff(ctx context.Context, conceptId string) (*model.UpdateDiff, error) {
-	logrus.Info("Starting to get concept diff from database")
-	filter := bson.D{{Key: "resourceId", Value: conceptId}}
-	current, err := r.collection.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer current.Close(ctx)
-	var updates []*model.UpdateDbo
-	for current.Next(ctx) {
-		var update model.UpdateDbo
-		err := bson.Unmarshal(current.Current, &update)
-		if err != nil {
-			return nil, err
-		}
-		updates = append(updates, &update)
-	}
-	if err := current.Err(); err != nil {
-		return nil, err
-	}
-	if len(updates) < 2 {
-		return nil, nil
-	}
-	logrus.Info("Finished getting all concept updates from database")
-	return &model.UpdateDiff{
-		ResourceId: conceptId,
-		Operations: updates[0].Operations,
-	}, nil
-}

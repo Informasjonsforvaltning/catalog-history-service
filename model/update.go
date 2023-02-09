@@ -35,16 +35,18 @@ type JsonPatchOperation struct {
 	Op    string `json:"op" bson:"op"`
 	Path  string `json:"path" bson:"path"`
 	Value string `json:"value" bson:"value"`
+	From  string `json:"from" bson:"from"`
 }
 
 type UpdateMeta struct {
 	ID         string    `json:"id" bson:"id"`
-	ResourceId string    `json:"resourceId" bson:"resourceId"`
-	DateTime   time.Time `json:"datetime" bson:"datetime"`
-	Person     Person    `json:"person" bson:"person"`
+	ResourceId string    `json:"resourceId"`
+	DateTime   time.Time `json:"datetime"`
+	Person     Person    `json:"person"`
 }
 
 type UpdateDiff struct {
 	ResourceId string               `json:"resourceId"`
 	Operations []JsonPatchOperation `json:"operations"`
+	Resource   string               `json:"resource"`
 }
