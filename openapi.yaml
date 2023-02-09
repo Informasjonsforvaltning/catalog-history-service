@@ -69,6 +69,32 @@ paths:
     get:
       tags:
         - catalog-history-service
+      description: Get update 
+      operationId: getUpdate
+      parameters:
+        - name: conceptId
+          in: path
+          description: concept id
+          required: true
+          schema:
+            type: string
+        - name: updateId
+          in: path
+          description: update id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Update'
+  /concepts/{conceptId}/{updateId}/diff:
+    get:
+      tags:
+        - catalog-history-service
       description: Get update diff
       operationId: getUpdateDiff
       parameters:
@@ -115,12 +141,17 @@ components:
       type: object
       description: Pre and post diff
       properties:
-        pre:
+        resourceId:
+          type: string
+          description: resource id
+        resource:
           type: object
-          description: Document before update
-        post:
-          type: object
-          description: Document after update
+          description: Resource before update
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/JsonPatchOperation'
+          description: List of operations defining the update
 
     UpdateMeta:
       type: object
@@ -129,6 +160,9 @@ components:
         id:
           type: string
           description: update id
+        resourceId:
+          type: string
+          description: resource id
         person:
           $ref: "#/components/schemas/Person"
           description: Person who updated the document 
