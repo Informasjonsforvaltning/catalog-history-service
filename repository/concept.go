@@ -15,6 +15,7 @@ type ConceptsRepository interface {
 	StoreConcept(ctx context.Context, update model.UpdateDbo) error
 	GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.UpdateDbo, error)
 	GetConceptUpdate(ctx context.Context, id string) (*model.UpdateDbo, error)
+	GetConceptDiff(ctx context.Context, id string) (*model.UpdateDiff, error)
 }
 
 // conceptsRepository is a struct that holds a reference to a MongoDB collection

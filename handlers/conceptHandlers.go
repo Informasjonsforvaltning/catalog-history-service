@@ -6,18 +6,22 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/service"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/ulule/paging"
 )
 
-func GetConceptUpdatesHandler() func(c *gin.Context) {
-	service := service.InitService()
+func GetConceptUpdatesHandler(service *service.UpdateService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
 		logrus.Info("Getting all updates for concepts with id: %s", conceptId)
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId)
+		page, size := pagination.GetPageAndSize(c)
+		updates, total, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size)
 		if status == http.StatusOK {
-			c.JSON(status, concepts)
+			c.JSON(status, gin.H{
+				"updates": updates,
+				"total":   total,
+			})
 		} else {
-			c.Status(status)
+			c.AbortWithStatus(status)
 		}
 	}
 }
@@ -38,10 +42,27 @@ func GetConceptUpdateHandler() func(c *gin.Context) {
 	}
 }
 
+// function to get diff between two updates
+func GetConceptDiffHandler() func(c *gin.Context) {
+	service := service.InitService()
+	return func(c *gin.Context) {
+		conceptId := c.Param("conceptId")
+		updateId := c.Param("updateId")
+		logrus.Infof("Get diff for update %s for concept %s", updateId, conceptId)
+
+		diff, status := service.GetConceptUpdateDiff(c.Request.Context(), conceptId, updateId)
+		if status == http.StatusOK {
+			c.JSON(status, diff)
+		} else {
+			c.Status(status)
+		}
+	}
+}
+
 func PostConceptUpdate() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {
-                conceptId := c.Param("conceptId")
+		conceptId := c.Param("conceptId")
 		logrus.Infof("Update for concept %s received.", conceptId)
 		bytes, err := c.GetRawData()
 
@@ -52,7 +73,7 @@ func PostConceptUpdate() func(c *gin.Context) {
 		} else {
 			newId, err := service.StoreConceptUpdate(c.Request.Context(), bytes, conceptId)
 			if err == nil {
-				c.Writer.Header().Add("Location", "/concepts/" + conceptId + "/"+*newId)
+				c.Writer.Header().Add("Location", "/concepts/"+conceptId+"/"+*newId)
 				c.JSON(http.StatusCreated, nil)
 			} else {
 				c.JSON(http.StatusInternalServerError, err.Error())
