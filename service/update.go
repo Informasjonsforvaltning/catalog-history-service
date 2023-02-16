@@ -21,10 +21,6 @@ type UpdateServiceImp struct {
 	ConceptsRepository repository.ConceptsRepositoryImp
 }
 
-type DiffServiceImp struct {
-	ConceptsRepository repository.ConceptsRepositoryImp
-}
-
 func InitService() *UpdateServiceImp {
 	service := UpdateServiceImp{
 		ConceptsRepository: *repository.InitRepository(),
@@ -121,7 +117,7 @@ func (service *UpdateServiceImp) GetConceptUpdateDiff(ctx context.Context, conce
 		logrus.Error("Get concept updates failed")
 		return nil, http.StatusInternalServerError
 	}
-	concept, err := service.BuildConceptFromPatches(databaseUpdates)
+	concept, err := service.BuildResourceFromPatches(databaseUpdates)
 	if err != nil {
 		logrus.Error("Unable to build concept from patches")
 		logrus.Error(err)
@@ -135,8 +131,8 @@ func (service *UpdateServiceImp) GetConceptUpdateDiff(ctx context.Context, conce
 	}, http.StatusOK
 }
 
-func (service *UpdateServiceImp) BuildConceptFromPatches(databaseUpdates []*model.UpdateDbo) ([]byte, error) {
-	concept := []byte("{}")
+func BuildResourceFromPatches(databaseUpdates []*model.UpdateDbo) ([]byte, error) {
+	resource := []byte("{}")
 	var err error
 
 	for _, update := range databaseUpdates {
@@ -144,12 +140,12 @@ func (service *UpdateServiceImp) BuildConceptFromPatches(databaseUpdates []*mode
 			logrus.Warning("Update is nil")
 		} else {
 			logrus.Info("Update: " + update.ID)
-			concept, err = applyPatchesToResource(concept, *update)
+			resource, err = applyPatchesToResource(resource, *update)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-	return concept, nil
+	return resource, nil
 
 }

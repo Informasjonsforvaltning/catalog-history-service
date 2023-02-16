@@ -16,7 +16,6 @@ func jsonPatchOperationsToByteArray(ops []model.JsonPatchOperation) ([]byte, err
 }
 
 func applyPatchesToResource(original []byte, databaseUpdates model.UpdateDbo) ([]byte, error) {
-
 	patchJSON, err := jsonPatchOperationsToByteArray(databaseUpdates.Operations)
 	if err != nil {
 		return nil, err

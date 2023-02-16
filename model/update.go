@@ -14,8 +14,8 @@ type UpdateDbo struct {
 }
 
 type UpdateDto struct {
-	Person     Person               `json:"person" bson:"person"`
-	Operations []JsonPatchOperation `json:"operations" bson:"operations"`
+	Person     Person               `json:"person"`
+	Operations []JsonPatchOperation `json:"operations"
 }
 
 func (update UpdateDto) Validate() error {
@@ -39,7 +39,7 @@ type JsonPatchOperation struct {
 }
 
 type UpdateMeta struct {
-	ID         string    `json:"id" bson:"id"`
+	ID         string    `json:"id"`
 	ResourceId string    `json:"resourceId"`
 	DateTime   time.Time `json:"datetime"`
 	Person     Person    `json:"person"`
