@@ -20,7 +20,7 @@ tags:
 servers:
   - url: 'https://catalog-history.fellesdatakatalog.digdir.no'
 paths:
-  /concepts/{conceptId}:
+  /concepts/{conceptId}/updates:
     post:
       tags:
         - catalog-history-service
@@ -42,7 +42,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Update'
+              $ref: '#/components/schemas/UpdatePayload'
     get:
       tags:
         - catalog-history-service
@@ -56,16 +56,35 @@ paths:
           required: true
           schema:
             type: string
+        - name: page
+          in: query
+          description: page number
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: page size
+          schema:
+            type: integer
+            default: 10
+        - name: sort
+          in: query
+          description: sort type
+          schema:
+            type: string
+            enum:
+              - date_desc
+              - date_asc
+            default: date_desc
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UpdateMeta'
-  /concepts/{conceptId}/{updateId}:
+                $ref: '#/components/schemas/Updates'
+  /concepts/{conceptId}/updates/{updateId}:
     get:
       tags:
         - catalog-history-service
@@ -90,11 +109,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpdateDiff'
+                $ref: '#/components/schemas/Update'
 
 components:
   schemas:
-    Update:
+    UpdatePayload:
       type: object
       description: Json patch update and meta data regarding update
       properties:
@@ -111,24 +130,16 @@ components:
             $ref: '#/components/schemas/JsonPatchOperation'
           description: List of operations defining the update
 
-    UpdateDiff:
+    Update:
       type: object
-      description: Pre and post diff
-      properties:
-        pre:
-          type: object
-          description: Document before update
-        post:
-          type: object
-          description: Document after update
-
-    UpdateMeta:
-      type: object
-      description: Meta data regarding update
+      description: Complete data object regarding update
       properties:
         id:
           type: string
           description: update id
+        resourceId:
+          type: string
+          description: resource id
         person:
           $ref: "#/components/schemas/Person"
           description: Person who updated the document 
@@ -136,6 +147,11 @@ components:
           type: string
           format: date
           description: date of update
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/JsonPatchOperation'
+          description: List of operations defining the update
 
     Person:
       type: object
@@ -180,3 +196,29 @@ components:
         from:
           description: 'A JSON Pointer path pointing to the location to move/copy from.'
           type: string
+
+    Updates:
+      type: object
+      description: List of updates with meta data
+      properties:
+        updates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Update'
+          description: List of updates
+        page:
+          $ref: "#/components/schemas/Pagination"
+          description: Pagination details
+
+    Pagination:
+      type: object
+      description: Pagination details
+      properties:
+        currentPage:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
