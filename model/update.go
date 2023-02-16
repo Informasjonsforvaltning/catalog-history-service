@@ -15,7 +15,7 @@ type UpdateDbo struct {
 
 type UpdateDto struct {
 	Person     Person               `json:"person"`
-	Operations []JsonPatchOperation `json:"operations"
+	Operations []JsonPatchOperation `json:"operations"`
 }
 
 func (update UpdateDto) Validate() error {

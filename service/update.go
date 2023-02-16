@@ -56,11 +56,15 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string) (*[]*model.UpdateMeta, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, pageSize int, pageNumber int) (*[]*model.UpdateMeta, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
 	query = append(query, bson.E{Key: "datetime", Value: bson.M{"$lt": time.Now()}})
-	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query)
+
+	// Calculate the number of results to skip based on the page size and number.
+	skip := pageSize * (pageNumber - 1)
+
+	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, skip, pageSize)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
 		return nil, http.StatusInternalServerError

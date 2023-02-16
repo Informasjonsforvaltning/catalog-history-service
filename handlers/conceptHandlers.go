@@ -6,18 +6,22 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/service"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/ulule/paging"
 )
 
-func GetConceptUpdatesHandler() func(c *gin.Context) {
-	service := service.InitService()
+func GetConceptUpdatesHandler(service *service.UpdateService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
 		logrus.Info("Getting all updates for concepts with id: %s", conceptId)
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId)
+		page, size := pagination.GetPageAndSize(c)
+		updates, total, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size)
 		if status == http.StatusOK {
-			c.JSON(status, concepts)
+			c.JSON(status, gin.H{
+				"updates": updates,
+				"total":   total,
+			})
 		} else {
-			c.Status(status)
+			c.AbortWithStatus(status)
 		}
 	}
 }
