@@ -16,7 +16,7 @@ func TestCreateUpdate(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	toBeCreated := model.UpdateDto{
+	toBeCreated := model.UpdatePayload{
 		Person: model.Person{
 			ID:    "123456789",
 			Email: "example@example.com",
@@ -45,7 +45,7 @@ func TestCreateUpdate(t *testing.T) {
 
 	req, _ = http.NewRequest("GET", location.Path, nil)
 
-	var newUpdate model.UpdateDbo
+	var newUpdate model.Update
 	json.Unmarshal(w.Body.Bytes(), &newUpdate)
 	assert.NotNil(t, newUpdate)
 }

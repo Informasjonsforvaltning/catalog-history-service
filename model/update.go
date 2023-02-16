@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type UpdateDbo struct {
+type Update struct {
 	ID         string               `json:"id"`
 	ResourceId string               `json:"resourceId"`
 	Person     Person               `json:"person"`
@@ -13,16 +13,20 @@ type UpdateDbo struct {
 	Operations []JsonPatchOperation `json:"operations"`
 }
 
-type UpdateDto struct {
+type UpdatePayload struct {
 	Person     Person               `json:"person"`
 	Operations []JsonPatchOperation `json:"operations"`
 }
 
-func (update UpdateDto) Validate() error {
+func (update UpdatePayload) Validate() error {
 	if 0 < len(update.Operations) {
 		return nil
 	}
 	return fmt.Errorf("Update is not valid")
+}
+
+type Updates struct {
+	Updates []*Update `json:"updates"`
 }
 
 type Person struct {
@@ -35,15 +39,4 @@ type JsonPatchOperation struct {
 	Op    string `json:"op"`
 	Path  string `json:"path"`
 	Value string `json:"value"`
-}
-
-type UpdateMeta struct {
-	ID         string    `json:"id"`
-	ResourceId string    `json:"resourceId"`
-	DateTime   time.Time `json:"datetime"`
-	Person     Person    `json:"person"`
-}
-
-type UpdateDiff struct {
-	ResourceId string `json:"resourceId"`
 }

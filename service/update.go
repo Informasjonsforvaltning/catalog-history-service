@@ -29,7 +29,7 @@ func InitService() *UpdateServiceImp {
 }
 
 func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte, conceptId string) (*string, error) {
-	var update model.UpdateDto
+	var update model.UpdatePayload
 	err := json.Unmarshal(bytes, &update)
 	logrus.Info("Unmarshalled update")
 	if err != nil {
@@ -41,7 +41,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 		logrus.Error("Concept update is not valid")
 		return nil, err
 	}
-	var updateDbo = model.UpdateDbo{
+	var updateDbo = model.Update{
 		ID:         uuid.New().String(),
 		ResourceId: conceptId,
 		DateTime:   time.Now(),
@@ -56,7 +56,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string) (*[]*model.UpdateMeta, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string) (*model.Updates, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
 	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query)
@@ -66,25 +66,14 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 	}
 
 	if databaseUpdates == nil {
-		databaseUpdates = []*model.UpdateDbo{}
+		return &model.Updates{Updates: []*model.Update{}}, http.StatusOK
+	} else {
+		return &model.Updates{Updates: databaseUpdates}, http.StatusOK
 	}
-
-	var updates []*model.UpdateMeta
-
-	for _, update := range databaseUpdates {
-		updates = append(updates, &model.UpdateMeta{
-			ID:         update.ID,
-			ResourceId: update.ResourceId,
-			DateTime:   update.DateTime,
-			Person:     update.Person,
-		})
-	}
-
-	return &updates, http.StatusOK
 }
 
 // function to get a update from database
-func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.UpdateDbo, int) {
+func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.Update, int) {
 	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId)
 	if err != nil {
 		logrus.Error("Unable to get concept update")

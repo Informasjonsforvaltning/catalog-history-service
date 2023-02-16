@@ -20,7 +20,7 @@ func TestGetConcepts(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var actualResponse []model.UpdateMeta
+	var actualResponse []model.Update
 	err := json.Unmarshal(w.Body.Bytes(), &actualResponse)
 
 	assert.Nil(t, err)
