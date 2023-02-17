@@ -16,9 +16,9 @@ func TestCreateUpdate(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	toBeCreated := model.UpdateDto{
+	toBeCreated := model.UpdatePayload{
 		Person: model.Person{
-			ID:    "123456789",
+			ID:    "123",
 			Email: "example@example.com",
 			Name:  "Ola Nordmann",
 		},
@@ -36,16 +36,13 @@ func TestCreateUpdate(t *testing.T) {
 	}
 
 	body, _ := json.Marshal(toBeCreated)
-	req, _ := http.NewRequest("POST", "/concepts/123456789", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/concepts/123456789/updates", bytes.NewBuffer(body))
 	router.ServeHTTP(w, req)
-	location, _ := w.Result().Location()
 
 	//assert.NotNil(t, location)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	req, _ = http.NewRequest("GET", location.Path, nil)
-
-	var newUpdate model.UpdateDbo
+	var newUpdate model.Update
 	json.Unmarshal(w.Body.Bytes(), &newUpdate)
 	assert.NotNil(t, newUpdate)
 }

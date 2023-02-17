@@ -41,7 +41,7 @@ func GetConceptUpdateHandler() func(c *gin.Context) {
 func PostConceptUpdate() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {
-                conceptId := c.Param("conceptId")
+		conceptId := c.Param("conceptId")
 		logrus.Infof("Update for concept %s received.", conceptId)
 		bytes, err := c.GetRawData()
 
@@ -52,7 +52,7 @@ func PostConceptUpdate() func(c *gin.Context) {
 		} else {
 			newId, err := service.StoreConceptUpdate(c.Request.Context(), bytes, conceptId)
 			if err == nil {
-				c.Writer.Header().Add("Location", "/concepts/" + conceptId + "/"+*newId)
+				c.Writer.Header().Add("Location", "/concepts/"+conceptId+"/updates/"+*newId)
 				c.JSON(http.StatusCreated, nil)
 			} else {
 				c.JSON(http.StatusInternalServerError, err.Error())

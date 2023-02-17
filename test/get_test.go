@@ -15,14 +15,13 @@ func TestGetConcepts(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concepts/123456789", nil)
+	req, _ := http.NewRequest("GET", "/concepts/123456789/updates", nil)
 	router.ServeHTTP(w, req)
-
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var actualResponse []model.UpdateMeta
+	var actualResponse model.Updates
 	err := json.Unmarshal(w.Body.Bytes(), &actualResponse)
 
 	assert.Nil(t, err)
-	assert.True(t, len(actualResponse) > 0)
+	assert.True(t, len(actualResponse.Updates) > 0)
 }

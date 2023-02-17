@@ -119,11 +119,7 @@ components:
       properties:
         person:
           $ref: "#/components/schemas/Person"
-          description: Person who updated the document 
-        datetime:
-          type: string
-          format: date
-          description: date of update
+          description: Person who updated the document        
         operations:
           type: array
           items:
