@@ -19,9 +19,9 @@ func TestGetConcepts(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var actualResponse []model.Update
+	var actualResponse model.Updates
 	err := json.Unmarshal(w.Body.Bytes(), &actualResponse)
 
 	assert.Nil(t, err)
-	assert.True(t, len(actualResponse) > 0)
+	assert.True(t, len(actualResponse.Updates) > 0)
 }
