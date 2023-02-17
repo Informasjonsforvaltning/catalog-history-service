@@ -17,7 +17,7 @@ func TestGetConcepts(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/concepts/123456789", nil)
 	router.ServeHTTP(w, req)
-
+req, _ := http.NewRequest("GET", "/concepts/123456789/updates", nil)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var actualResponse []model.Update

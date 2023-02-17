@@ -42,7 +42,7 @@ func TestCreateUpdate(t *testing.T) {
 
 	//assert.NotNil(t, location)
 	assert.Equal(t, http.StatusCreated, w.Code)
-
+req, _ := http.NewRequest("POST", "/concepts/123456789/updates", bytes.NewBuffer(body))
 	req, _ = http.NewRequest("GET", location.Path, nil)
 
 	var newUpdate model.Update
