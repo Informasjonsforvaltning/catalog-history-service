@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/service"
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,22 @@ func GetConceptUpdateHandler() func(c *gin.Context) {
 		updateId := c.Param("updateId")
 		logrus.Infof("Get update %s for concept %s", updateId, conceptId)
 
-		concept, status := service.GetConceptUpdate(c.Request.Context(), conceptId, updateId)
+		// Get the skip and limit values from the query parameters
+		skip := c.Query("skip")
+		limit := c.Query("limit")
+
+		// Convert the skip and limit values to integers
+		skipInt, err := strconv.Atoi(skip)
+		if err != nil {
+			skipInt = 0
+		}
+
+		limitInt, err := strconv.Atoi(limit)
+		if err != nil {
+			limitInt = 10
+		}
+
+		concept, status := service.GetConceptUpdate(c.Request.Context(), conceptId, updateId, skipInt, limitInt)
 		if status == http.StatusOK {
 			c.JSON(status, concept)
 		} else {
