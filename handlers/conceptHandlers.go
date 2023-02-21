@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/service"
 	"github.com/gin-gonic/gin"
@@ -12,8 +13,18 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
-		logrus.Info("Getting all updates for concepts with id: %s", conceptId)
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId)
+
+		page, err := strconv.Atoi(c.Query("page"))
+		if err != nil {
+			page = 1
+		}
+
+		size, err := strconv.Atoi(c.Query("size"))
+		if err != nil {
+			size = 10
+		}
+
+		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size)
 		if status == http.StatusOK {
 			c.JSON(status, concepts)
 		} else {

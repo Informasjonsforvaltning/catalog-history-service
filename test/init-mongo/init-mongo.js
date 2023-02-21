@@ -19,7 +19,32 @@ db.concepts.insert(
         {
             "op": "remove",
             "path": "/height"
+        },
+        {
+            "op": "add",
+            "path": "/name",
+            "value": "Jane Test"
         }
     ]
 }
 );
+
+db.concepts.insert(
+    {
+        "id": "789",
+        "resourceId": "123456789",
+        "person": {
+            "id": "789",
+            "email": "example3@example.com",
+            "name": "Joe Doe"
+        },
+        "datetime": "2019-01-03T00:00:00Z",
+        "operations": [
+            {
+                "op": "add",
+                "path": "/name",
+                "value": "Joe"
+            }
+        ]
+    }
+    );

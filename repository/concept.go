@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/connection"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
@@ -36,14 +37,19 @@ func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.U
 	return err
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.Update, error) {
-	current, err := r.collection.Find(ctx, query)
-	logrus.Info("Starting GetConceptUpdates")
+func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D, page int, size int) ([]*model.Update, error) {
+	skip := (page - 1) * size
+
+	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(size))
+
+	current, err := r.collection.Find(ctx, query, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer current.Close(ctx)
+
 	var updates []*model.Update
+
 	for current.Next(ctx) {
 		var update model.Update
 		err := bson.Unmarshal(current.Current, &update)
@@ -55,15 +61,15 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 	if err := current.Err(); err != nil {
 		return nil, err
 	}
-	logrus.Info("Finished getting all concept updates from database")
 	return updates, nil
 }
 
 func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.Update, error) {
+
 	filter := bson.D{{Key: "id", Value: updateId}, {Key: "resourceId", Value: conceptId}}
+
 	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
 	logrus.Info("Starting to get concept update from database")
-
 	if err == mongo.ErrNoDocuments {
 		logrus.Error("concept update not found in db")
 		return nil, nil
