@@ -13,8 +13,18 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 	service := service.InitService()
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
-		logrus.Info("Getting all updates for concepts with id: %s", conceptId)
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId)
+
+		page, err := strconv.Atoi(c.Query("page"))
+		if err != nil {
+			page = 1
+		}
+
+		size, err := strconv.Atoi(c.Query("size"))
+		if err != nil {
+			size = 10
+		}
+
+		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size)
 		if status == http.StatusOK {
 			c.JSON(status, concepts)
 		} else {
@@ -30,22 +40,7 @@ func GetConceptUpdateHandler() func(c *gin.Context) {
 		updateId := c.Param("updateId")
 		logrus.Infof("Get update %s for concept %s", updateId, conceptId)
 
-		// Get the skip and limit values from the query parameters
-		skip := c.Query("skip")
-		limit := c.Query("limit")
-
-		// Convert the skip and limit values to integers
-		skipInt, err := strconv.Atoi(skip)
-		if err != nil {
-			skipInt = 0
-		}
-
-		limitInt, err := strconv.Atoi(limit)
-		if err != nil {
-			limitInt = 10
-		}
-
-		concept, status := service.GetConceptUpdate(c.Request.Context(), conceptId, updateId, skipInt, limitInt)
+		concept, status := service.GetConceptUpdate(c.Request.Context(), conceptId, updateId)
 		if status == http.StatusOK {
 			c.JSON(status, concept)
 		} else {

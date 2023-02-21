@@ -56,25 +56,27 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string) (*model.Updates, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, page int, size int) (*model.Updates, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
-	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query)
+	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
 		return nil, http.StatusInternalServerError
 	}
 
 	if databaseUpdates == nil {
+		logrus.Error("No concept updates found")
 		return &model.Updates{Updates: []*model.Update{}}, http.StatusOK
 	} else {
+		logrus.Info("Returning concept updates")
 		return &model.Updates{Updates: databaseUpdates}, http.StatusOK
 	}
 }
 
 // function to get a update from database
-func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string, page int, size int) (*model.Update, int) {
-	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId, page, size)
+func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.Update, int) {
+	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId)
 	if err != nil {
 		logrus.Error("Unable to get concept update")
 		return nil, http.StatusInternalServerError

@@ -37,14 +37,20 @@ func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.U
 	return err
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D) ([]*model.Update, error) {
-	current, err := r.collection.Find(ctx, query)
-	logrus.Info("Starting GetConceptUpdates")
+func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D, page int, size int) ([]*model.Update, error) {
+	pageInt := (page - 1) * size
+	sizeInt := size
+
+	opts := options.Find().SetSkip(int64(pageInt)).SetLimit(int64(sizeInt))
+
+	current, err := r.collection.Find(ctx, query, opts)
 	if err != nil {
 		return nil, err
 	}
 	defer current.Close(ctx)
+
 	var updates []*model.Update
+
 	for current.Next(ctx) {
 		var update model.Update
 		err := bson.Unmarshal(current.Current, &update)
@@ -56,26 +62,15 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 	if err := current.Err(); err != nil {
 		return nil, err
 	}
-	logrus.Info("Finished getting all concept updates from database")
 	return updates, nil
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string, page int, size int) (*model.Update, error) {
-	skip := (page - 1) * size
-	limit := size
+func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.Update, error) {
 
 	filter := bson.D{{Key: "id", Value: updateId}, {Key: "resourceId", Value: conceptId}}
-	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
 
-	//bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
+	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
 	logrus.Info("Starting to get concept update from database")
-	cursor, err := r.collection.Find(ctx, filter, opts)
-	if err != nil {
-		logrus.Errorf("error when getting concept from db: %s", err)
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
 	if err == mongo.ErrNoDocuments {
 		logrus.Error("concept update not found in db")
 		return nil, nil
@@ -86,7 +81,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId s
 	}
 
 	var update model.Update
-	unmarshalError := bson.Unmarshal(cursor.Current, &update)
+	unmarshalError := bson.Unmarshal(bytes, &update)
 	if unmarshalError != nil {
 		logrus.Errorf("error when unmarshalling concept from db: %s", unmarshalError)
 		return nil, unmarshalError
