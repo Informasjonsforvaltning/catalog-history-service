@@ -38,10 +38,9 @@ func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.U
 }
 
 func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D, page int, size int) ([]*model.Update, error) {
-	pageInt := (page - 1) * size
-	sizeInt := size
+	skip := (page - 1) * size
 
-	opts := options.Find().SetSkip(int64(pageInt)).SetLimit(int64(sizeInt))
+	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(size))
 
 	current, err := r.collection.Find(ctx, query, opts)
 	if err != nil {
