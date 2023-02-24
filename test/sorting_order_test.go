@@ -33,7 +33,7 @@ func TestPaginationAndSortingTwo(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concepts/123456789/updates?page=1&size=2&sort_by=person&sort_order=asc", nil)
+	req, _ := http.NewRequest("GET", "/concepts/123456789/updates?page=1&size=2&sort_by=name&sort_order=asc", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 

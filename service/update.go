@@ -70,14 +70,9 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 	}
 
 	// Map sortOrder string to integer value
-	var sortOrderInt int
-	switch sortOrder {
-	case "asc":
+	sortOrderInt := -1
+	if sortOrder == "asc" {
 		sortOrderInt = 1
-	case "desc":
-		sortOrderInt = -1
-	default:
-		sortOrderInt = -1 // default to descending order
 	}
 
 	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
