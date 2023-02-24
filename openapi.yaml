@@ -73,7 +73,10 @@ paths:
           description: sort by column
           schema:
             type: string
-            default: datetime
+            enum:
+              - datetime
+              - email
+              - name
         - name: sort_order
           in: query
           description: sort order

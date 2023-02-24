@@ -48,3 +48,40 @@ db.concepts.insert(
         ]
     }
     );
+
+    db.concepts.insert({
+        "id": "456",
+        "resourceId": "123456789",
+        "person": {
+            "id": "456",
+            "email": "example2@example.com",
+            "name": "Sarah Doe"
+        },
+        "datetime": "2019-01-02T00:00:00Z",
+        "operations": [
+            {
+                "op": "replace",
+                "path": "/name",
+                "value": "Sarah"
+            }
+        ]
+    });
+    
+    db.concepts.insert({
+        "id": "012",
+        "resourceId": "123456789",
+        "person": {
+            "id": "012",
+            "email": "example4@example.com",
+            "name": "Bob Doe"
+        },
+        "datetime": "2019-01-04T00:00:00Z",
+        "operations": [
+            {
+                "op": "replace",
+                "path": "/name",
+                "value": "Bob"
+            }
+        ]
+    });
+    

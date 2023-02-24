@@ -60,6 +60,15 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
 
+	// Set default sort by column to "datetime"
+	sortByCol := "datetime"
+	switch sortBy {
+	case "name":
+		sortByCol = "person.name"
+	case "email":
+		sortByCol = "person.email"
+	}
+
 	// Map sortOrder string to integer value
 	var sortOrderInt int
 	switch sortOrder {
@@ -71,7 +80,7 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 		sortOrderInt = -1 // default to descending order
 	}
 
-	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size, sortBy, sortOrderInt)
+	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
 		return nil, http.StatusInternalServerError
