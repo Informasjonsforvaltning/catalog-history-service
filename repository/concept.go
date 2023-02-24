@@ -37,10 +37,14 @@ func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.U
 	return err
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D, page int, size int) ([]*model.Update, error) {
+func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D, page int, size int, sortBy string, sortOrder int) ([]*model.Update, error) {
 	skip := (page - 1) * size
 
 	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(size))
+
+	// Sort the results by the specified field and order
+	sort := bson.D{{Key: sortBy, Value: sortOrder}}
+	opts.SetSort(sort)
 
 	current, err := r.collection.Find(ctx, query, opts)
 	if err != nil {

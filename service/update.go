@@ -56,10 +56,26 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, page int, size int) (*model.Updates, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, page int, size int, sortBy string, sortOrder string) (*model.Updates, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
-	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size)
+
+	// Set default sort by column to "datetime"
+	sortByCol := "datetime"
+	switch sortBy {
+	case "name":
+		sortByCol = "person.name"
+	case "email":
+		sortByCol = "person.email"
+	}
+
+	// Map sortOrder string to integer value
+	sortOrderInt := -1
+	if sortOrder == "asc" {
+		sortOrderInt = 1
+	}
+
+	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
 		return nil, http.StatusInternalServerError

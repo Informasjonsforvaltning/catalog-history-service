@@ -24,7 +24,7 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 			size = 10
 		}
 
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size)
+		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size, c.Query("sort_by"), c.Query("sort_order"))
 		if status == http.StatusOK {
 			c.JSON(status, concepts)
 		} else {

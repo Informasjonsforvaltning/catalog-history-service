@@ -68,15 +68,24 @@ paths:
           schema:
             type: integer
             default: 10
-        - name: sort
+        - name: sort_by
           in: query
-          description: sort type
+          description: sort by column
           schema:
             type: string
             enum:
-              - date_desc
-              - date_asc
-            default: date_desc
+              - datetime
+              - email
+              - name
+        - name: sort_order
+          in: query
+          description: sort order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
       responses:
         '200':
           description: OK
