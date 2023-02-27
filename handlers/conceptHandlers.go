@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
 	"github.com/Informasjonsforvaltning/catalog-history-service/service"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -58,6 +59,7 @@ func PostConceptUpdate() func(c *gin.Context) {
 
 		if err != nil {
 			logrus.Errorf("Unable to get bytes from request.")
+			logging.LogAndPrintError(err)
 
 			c.JSON(http.StatusBadRequest, err.Error())
 		} else {

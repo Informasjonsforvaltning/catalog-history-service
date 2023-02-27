@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
 	"github.com/Informasjonsforvaltning/catalog-history-service/repository"
 	"github.com/google/uuid"
@@ -34,11 +35,13 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	logrus.Info("Unmarshalled update")
 	if err != nil {
 		logrus.Error("Unable to unmarshal concept update")
+		logging.LogAndPrintError(err)
 		return nil, err
 	}
 	err = update.Validate()
 	if err != nil {
 		logrus.Error("Concept update is not valid")
+		logging.LogAndPrintError(err)
 		return nil, err
 	}
 	var updateDbo = model.Update{
@@ -51,6 +54,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	err = service.ConceptsRepository.StoreConcept(ctx, updateDbo)
 	if err != nil {
 		logrus.Error("Could not store concept update" + err.Error())
+		logging.LogAndPrintError(err)
 		return nil, err
 	}
 	return &updateDbo.ID, nil
@@ -78,14 +82,17 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
+		logging.LogAndPrintError(err)
 		return nil, http.StatusInternalServerError
 	}
 
 	if databaseUpdates == nil {
 		logrus.Error("No concept updates found")
+		logging.LogAndPrintError(err)
 		return &model.Updates{Updates: []*model.Update{}}, http.StatusOK
 	} else {
 		logrus.Info("Returning concept updates")
+		logging.LogAndPrintError(err)
 		return &model.Updates{Updates: databaseUpdates}, http.StatusOK
 	}
 }
@@ -95,9 +102,11 @@ func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId
 	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId)
 	if err != nil {
 		logrus.Error("Unable to get concept update")
+		logging.LogAndPrintError(err)
 		return nil, http.StatusInternalServerError
 	} else if conceptUpdate == nil {
 		logrus.Error("Concept update not found")
+		logging.LogAndPrintError(err)
 		return nil, http.StatusNotFound
 	} else {
 		return conceptUpdate, http.StatusOK
