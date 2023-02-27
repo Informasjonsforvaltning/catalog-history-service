@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/connection"
+	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
 	"github.com/sirupsen/logrus"
 )
@@ -48,6 +49,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 
 	current, err := r.collection.Find(ctx, query, opts)
 	if err != nil {
+		logging.LogAndPrintError(err)
 		return nil, err
 	}
 	defer current.Close(ctx)
@@ -58,11 +60,13 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 		var update model.Update
 		err := bson.Unmarshal(current.Current, &update)
 		if err != nil {
+			logging.LogAndPrintError(err)
 			return nil, err
 		}
 		updates = append(updates, &update)
 	}
 	if err := current.Err(); err != nil {
+		logging.LogAndPrintError(err)
 		return nil, err
 	}
 	return updates, nil
@@ -76,10 +80,12 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId s
 	logrus.Info("Starting to get concept update from database")
 	if err == mongo.ErrNoDocuments {
 		logrus.Error("concept update not found in db")
+		logging.LogAndPrintError(err)
 		return nil, nil
 	}
 	if err != nil {
 		logrus.Errorf("error when getting concept from db: %s", err)
+		logging.LogAndPrintError(err)
 		return nil, err
 	}
 
@@ -87,6 +93,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId s
 	unmarshalError := bson.Unmarshal(bytes, &update)
 	if unmarshalError != nil {
 		logrus.Errorf("error when unmarshalling concept from db: %s", unmarshalError)
+		logging.LogAndPrintError(unmarshalError)
 		return nil, unmarshalError
 	}
 
