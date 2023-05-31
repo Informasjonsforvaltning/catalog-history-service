@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-history-service
+  labels:
+    app: catalog-history-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-history-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: catalog-history-service
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+        - name: catalog-history-service
+          image: catalog-history-service
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080

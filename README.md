@@ -43,3 +43,7 @@ curl -X 'GET' \
   'localhost:8080/ping' \
   -H 'accept: application/json'
 ```
+
+### Deployment
+
+We use kustomize to deploy the service. All yaml files are located in the ./deploy folder.
