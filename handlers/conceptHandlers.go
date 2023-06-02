@@ -11,7 +11,7 @@ import (
 )
 
 func GetConceptUpdatesHandler() func(c *gin.Context) {
-	service := service.InitService()
+	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
 
@@ -25,7 +25,7 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 			size = 10
 		}
 
-		concepts, status := service.GetConceptUpdates(c.Request.Context(), conceptId, page, size, c.Query("sort_by"), c.Query("sort_order"))
+		concepts, status := updateService.GetConceptUpdates(c.Request.Context(), conceptId, page, size, c.Query("sort_by"), c.Query("sort_order"))
 		if status == http.StatusOK {
 			c.JSON(status, concepts)
 		} else {
@@ -35,13 +35,13 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 }
 
 func GetConceptUpdateHandler() func(c *gin.Context) {
-	service := service.InitService()
+	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
 		updateId := c.Param("updateId")
 		logrus.Infof("Get update %s for concept %s", updateId, conceptId)
 
-		concept, status := service.GetConceptUpdate(c.Request.Context(), conceptId, updateId)
+		concept, status := updateService.GetConceptUpdate(c.Request.Context(), conceptId, updateId)
 		if status == http.StatusOK {
 			c.JSON(status, concept)
 		} else {
@@ -51,7 +51,7 @@ func GetConceptUpdateHandler() func(c *gin.Context) {
 }
 
 func PostConceptUpdate() func(c *gin.Context) {
-	service := service.InitService()
+	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
 		conceptId := c.Param("conceptId")
 		logrus.Infof("Update for concept %s received.", conceptId)
@@ -63,7 +63,7 @@ func PostConceptUpdate() func(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, err.Error())
 		} else {
-			newId, err := service.StoreConceptUpdate(c.Request.Context(), bytes, conceptId)
+			newId, err := updateService.StoreConceptUpdate(c.Request.Context(), bytes, conceptId)
 			if err == nil {
 				c.Writer.Header().Add("Location", "/concepts/"+conceptId+"/updates/"+*newId)
 				c.JSON(http.StatusCreated, nil)

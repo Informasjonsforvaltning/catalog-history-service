@@ -26,7 +26,7 @@ func (update UpdatePayload) Validate() error {
 }
 
 type Updates struct {
-	Updates []*Update `json:"updates"`
+	Updates []Update `json:"updates"`
 }
 
 type Person struct {

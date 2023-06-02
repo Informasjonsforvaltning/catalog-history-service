@@ -1,7 +1,8 @@
-package connection
+package mongodb
 
 import (
 	"context"
+	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,14 +23,16 @@ func ConnectionString() string {
 	return connectionString
 }
 
-func MongoCollection() *mongo.Collection {
+func Collection() *mongo.Collection {
 	mongoOptions := options.Client().ApplyURI(ConnectionString())
 	client, err := mongo.Connect(context.Background(), mongoOptions)
 	if err != nil {
-		logrus.Error("mongo client failed", err)
+		logrus.Error("mongo client failed")
+		logging.LogAndPrintError(err)
 	}
 	if err != nil {
-		logrus.Error("mongo client connection failed", err)
+		logrus.Error("mongo client mongodb failed")
+		logging.LogAndPrintError(err)
 	}
 	collection := client.Database(env.ConstantValues.MongoDatabase).Collection(env.ConstantValues.MongoCollection)
 
