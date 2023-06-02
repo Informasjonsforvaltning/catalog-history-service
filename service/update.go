@@ -22,7 +22,7 @@ type UpdateServiceImp struct {
 	ConceptsRepository repository.ConceptsRepositoryImp
 }
 
-func InitService() *UpdateServiceImp {
+func InitUpdateService() *UpdateServiceImp {
 	service := UpdateServiceImp{
 		ConceptsRepository: *repository.InitRepository(),
 	}
@@ -60,7 +60,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, page int, size int, sortBy string, sortOrder string) (*model.Updates, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
 
@@ -83,17 +83,17 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 	if err != nil {
 		logrus.Error("Get concept updates failed")
 		logging.LogAndPrintError(err)
-		return nil, http.StatusInternalServerError
+		return model.Updates{}, http.StatusInternalServerError
 	}
 
 	if databaseUpdates == nil {
 		logrus.Error("No concept updates found")
 		logging.LogAndPrintError(err)
-		return &model.Updates{Updates: []*model.Update{}}, http.StatusOK
+		return model.Updates{Updates: []model.Update{}}, http.StatusOK
 	} else {
 		logrus.Info("Returning concept updates")
 		logging.LogAndPrintError(err)
-		return &model.Updates{Updates: databaseUpdates}, http.StatusOK
+		return model.Updates{Updates: databaseUpdates}, http.StatusOK
 	}
 }
 

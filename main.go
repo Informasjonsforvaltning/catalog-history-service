@@ -2,12 +2,15 @@ package main
 
 import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/config"
+	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
 )
 
 func main() {
-	config.LoggerSetup()
+	logging.LoggerSetup()
 
 	router := config.SetupRouter()
-	router.Run(":8080")
-	router.Run(":9091")
+	err := router.Run(":8080")
+	if err != nil {
+		logging.LogAndPrintError(err)
+	}
 }
