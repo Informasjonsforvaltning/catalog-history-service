@@ -4,9 +4,24 @@ go 1.20
 
 require (
 	cloud.google.com/go/errorreporting v0.3.0
+	github.com/Nerzal/gocloak/v13 v13.7.0
 	github.com/google/uuid v1.3.0
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/stretchr/testify v1.8.3
+)
+
+require (
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
+	github.com/go-resty/resty/v2 v2.7.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
+	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
+	github.com/lestrrat-go/blackmagic v1.0.0 // indirect
+	github.com/lestrrat-go/httpcc v1.0.1 // indirect
+	github.com/lestrrat-go/iter v1.0.1 // indirect
+	github.com/lestrrat-go/jwx v1.2.25 // indirect
+	github.com/lestrrat-go/option v1.0.0 // indirect
+	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/segmentio/ksuid v1.0.4 // indirect
 )
 
 require (

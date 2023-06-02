@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
@@ -14,8 +15,11 @@ import (
 func TestPaginationAndSorting(t *testing.T) {
 	router := config.SetupRouter()
 
+	orgReadAuth := OrgReadAuth("111222333")
+	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgReadAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concepts/123456789/updates?page=1&size=2&sort_by=datetime&sort_order=desc", nil)
+	req, _ := http.NewRequest("GET", "/111222333/concepts/123456789/updates?page=1&size=2&sort_by=datetime&sort_order=desc", nil)
+	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -32,8 +36,11 @@ func TestPaginationAndSorting(t *testing.T) {
 func TestPaginationAndSortingTwo(t *testing.T) {
 	router := config.SetupRouter()
 
+	orgWriteAuth := OrgWriteAuth("111222333")
+	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgWriteAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/concepts/123456789/updates?page=1&size=2&sort_by=name&sort_order=asc", nil)
+	req, _ := http.NewRequest("GET", "/111222333/concepts/123456789/updates?page=1&size=2&sort_by=name&sort_order=asc", nil)
+	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 

@@ -15,7 +15,32 @@ import (
 
 var dbClient *mongo.Client
 
+type TestConstants struct {
+	Audience     []string
+	SysAdminAuth string
+}
+
+var TestValues = TestConstants{
+	Audience:     []string{"catalog-history-service"},
+	SysAdminAuth: "system:root:admin",
+}
+
+func OrgAdminAuth(org string) string {
+	return fmt.Sprintf("organization:%s:admin", org)
+}
+
+func OrgWriteAuth(org string) string {
+	return fmt.Sprintf("organization:%s:write", org)
+}
+
+func OrgReadAuth(org string) string {
+	return fmt.Sprintf("organization:%s:read", org)
+}
+
 func TestMain(m *testing.M) {
+	mockJwkStore := MockJwkStore()
+	os.Setenv("KEYCLOAK_HOST", mockJwkStore.URL)
+
 	MongoContainerRunner(m)
 }
 

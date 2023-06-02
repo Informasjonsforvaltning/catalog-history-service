@@ -13,6 +13,7 @@ import (
 func GetConceptUpdatesHandler() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
+		catalogId := c.Param("catalogId")
 		conceptId := c.Param("conceptId")
 
 		page, err := strconv.Atoi(c.Query("page"))
@@ -25,7 +26,7 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 			size = 10
 		}
 
-		concepts, status := updateService.GetConceptUpdates(c.Request.Context(), conceptId, page, size, c.Query("sort_by"), c.Query("sort_order"))
+		concepts, status := updateService.GetConceptUpdates(c.Request.Context(), catalogId, conceptId, page, size, c.Query("sort_by"), c.Query("sort_order"))
 		if status == http.StatusOK {
 			c.JSON(status, concepts)
 		} else {
@@ -37,11 +38,12 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 func GetConceptUpdateHandler() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
+		catalogId := c.Param("catalogId")
 		conceptId := c.Param("conceptId")
 		updateId := c.Param("updateId")
 		logrus.Infof("Get update %s for concept %s", updateId, conceptId)
 
-		concept, status := updateService.GetConceptUpdate(c.Request.Context(), conceptId, updateId)
+		concept, status := updateService.GetConceptUpdate(c.Request.Context(), catalogId, conceptId, updateId)
 		if status == http.StatusOK {
 			c.JSON(status, concept)
 		} else {
@@ -53,6 +55,7 @@ func GetConceptUpdateHandler() func(c *gin.Context) {
 func PostConceptUpdate() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
+		catalogId := c.Param("catalogId")
 		conceptId := c.Param("conceptId")
 		logrus.Infof("Update for concept %s received.", conceptId)
 		bytes, err := c.GetRawData()
@@ -63,9 +66,9 @@ func PostConceptUpdate() func(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, err.Error())
 		} else {
-			newId, err := updateService.StoreConceptUpdate(c.Request.Context(), bytes, conceptId)
+			newId, err := updateService.StoreConceptUpdate(c.Request.Context(), bytes, catalogId, conceptId)
 			if err == nil {
-				c.Writer.Header().Add("Location", "/concepts/"+conceptId+"/updates/"+*newId)
+				c.Writer.Header().Add("Location", "/"+catalogId+"/concepts/"+conceptId+"/updates/"+*newId)
 				c.JSON(http.StatusCreated, nil)
 			} else {
 				c.JSON(http.StatusInternalServerError, err.Error())

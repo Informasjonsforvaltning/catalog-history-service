@@ -3,6 +3,7 @@ db.createCollection('concepts');
 db.concepts.insert(
     {
         "_id": "123",
+        "catalogId": "111222333",
         "resourceId": "123456789",
         "person": {
             "id": "123",
@@ -32,6 +33,7 @@ db.concepts.insert(
 db.concepts.insert(
     {
         "_id": "789",
+        "catalogId": "111222333",
         "resourceId": "123456789",
         "person": {
             "id": "789",
@@ -52,6 +54,7 @@ db.concepts.insert(
 db.concepts.insert(
     {
         "_id": "456",
+        "catalogId": "111222333",
         "resourceId": "123456789",
         "person": {
             "id": "456",
@@ -69,8 +72,10 @@ db.concepts.insert(
     }
 );
 
-db.concepts.insert({
+db.concepts.insert(
+    {
         "_id": "012",
+        "catalogId": "111222333",
         "resourceId": "123456789",
         "person": {
             "id": "012",
