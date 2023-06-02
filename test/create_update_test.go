@@ -42,7 +42,14 @@ func TestCreateUpdate(t *testing.T) {
 	//assert.NotNil(t, location)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	var newUpdate model.Update
-	json.Unmarshal(w.Body.Bytes(), &newUpdate)
-	assert.NotNil(t, newUpdate)
+	wGet := httptest.NewRecorder()
+	reqGet, _ := http.NewRequest("GET", w.Header().Get("Location"), nil)
+	router.ServeHTTP(wGet, reqGet)
+	assert.Equal(t, http.StatusOK, wGet.Code)
+
+	var created model.Update
+	err := json.Unmarshal(wGet.Body.Bytes(), &created)
+	assert.Nil(t, err)
+	assert.Equal(t, "123", created.Person.ID)
+	assert.Equal(t, 2, len(created.Operations))
 }

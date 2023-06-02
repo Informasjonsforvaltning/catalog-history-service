@@ -1,37 +1,37 @@
 db = db.getSiblingDB('catalog-history-service');
 db.createCollection('concepts');
 db.concepts.insert(
-{
-    "id": "123",
-    "resourceId": "123456789",
-    "person": {
-        "id": "123",
-        "email": "example@example.com",
-        "name": "John Doe"
-    },
-    "datetime": "2019-01-01T00:00:00Z",
-    "operations": [
-        {
-            "op": "replace",
-            "path": "/name",
-            "value": "Jane"
+    {
+        "_id": "123",
+        "resourceId": "123456789",
+        "person": {
+            "id": "123",
+            "email": "example@example.com",
+            "name": "John Doe"
         },
-        {
-            "op": "remove",
-            "path": "/height"
-        },
-        {
-            "op": "add",
-            "path": "/name",
-            "value": "Jane Test"
-        }
-    ]
-}
+        "datetime": "2019-01-01T00:00:00Z",
+        "operations": [
+            {
+                "op": "replace",
+                "path": "/name",
+                "value": "Jane"
+            },
+            {
+                "op": "remove",
+                "path": "/height"
+            },
+            {
+                "op": "add",
+                "path": "/name",
+                "value": "Jane Test"
+            }
+        ]
+    }
 );
 
 db.concepts.insert(
     {
-        "id": "789",
+        "_id": "789",
         "resourceId": "123456789",
         "person": {
             "id": "789",
@@ -47,10 +47,11 @@ db.concepts.insert(
             }
         ]
     }
-    );
+);
 
-    db.concepts.insert({
-        "id": "456",
+db.concepts.insert(
+    {
+        "_id": "456",
         "resourceId": "123456789",
         "person": {
             "id": "456",
@@ -65,10 +66,11 @@ db.concepts.insert(
                 "value": "Sarah"
             }
         ]
-    });
-    
-    db.concepts.insert({
-        "id": "012",
+    }
+);
+
+db.concepts.insert({
+        "_id": "012",
         "resourceId": "123456789",
         "person": {
             "id": "012",
@@ -83,5 +85,5 @@ db.concepts.insert(
                 "value": "Bob"
             }
         ]
-    });
-    
+    }
+);
