@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config"
 	"github.com/Informasjonsforvaltning/catalog-history-service/model"
@@ -35,15 +36,18 @@ func TestCreateUpdate(t *testing.T) {
 		},
 	}
 
+	orgAdminAuth := OrgAdminAuth("111222333")
+	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgAdminAuth, &TestValues.Audience)
 	body, _ := json.Marshal(toBeCreated)
-	req, _ := http.NewRequest("POST", "/concepts/123456789/updates", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 
-	//assert.NotNil(t, location)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	wGet := httptest.NewRecorder()
 	reqGet, _ := http.NewRequest("GET", w.Header().Get("Location"), nil)
+	reqGet.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(wGet, reqGet)
 	assert.Equal(t, http.StatusOK, wGet.Code)
 
@@ -52,4 +56,49 @@ func TestCreateUpdate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "123", created.Person.ID)
 	assert.Equal(t, 2, len(created.Operations))
+}
+
+func TestCreateUnauthorizedWhenMissingAuthHeader(t *testing.T) {
+	router := config.SetupRouter()
+
+	w := httptest.NewRecorder()
+	toBeCreated := model.UpdatePayload{}
+
+	body, _ := json.Marshal(toBeCreated)
+	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+func TestCreateForbiddenForReadRole(t *testing.T) {
+	router := config.SetupRouter()
+
+	w := httptest.NewRecorder()
+	toBeCreated := model.UpdatePayload{}
+
+	body, _ := json.Marshal(toBeCreated)
+	orgReadAuth := OrgReadAuth("111222333")
+	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgReadAuth, &TestValues.Audience)
+	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req.Header.Set("Authorization", *jwt)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func TestCreateForbiddenForRoleInWrongCatalog(t *testing.T) {
+	router := config.SetupRouter()
+
+	w := httptest.NewRecorder()
+	toBeCreated := model.UpdatePayload{}
+
+	body, _ := json.Marshal(toBeCreated)
+	orgAdminAuth := OrgAdminAuth("333222111")
+	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgAdminAuth, &TestValues.Audience)
+	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req.Header.Set("Authorization", *jwt)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }

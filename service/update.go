@@ -29,7 +29,7 @@ func InitUpdateService() *UpdateServiceImp {
 	return &service
 }
 
-func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte, conceptId string) (*string, error) {
+func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte, catalogId string, conceptId string) (*string, error) {
 	var update model.UpdatePayload
 	err := json.Unmarshal(bytes, &update)
 	logrus.Info("Unmarshalled update")
@@ -46,6 +46,7 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	}
 	var updateDbo = model.Update{
 		ID:         uuid.New().String(),
+		CatalogId:  catalogId,
 		ResourceId: conceptId,
 		DateTime:   time.Now(),
 		Person:     update.Person,
@@ -60,8 +61,9 @@ func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes [
 	return &updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
+func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, catalogId string, conceptId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
 	query := bson.D{}
+	query = append(query, bson.E{Key: "catalogId", Value: catalogId})
 	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
 
 	// Set default sort by column to "datetime"
@@ -98,8 +100,8 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, conceptI
 }
 
 // function to get a update from database
-func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.Update, int) {
-	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, conceptId, updateId)
+func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, catalogId string, conceptId string, updateId string) (*model.Update, int) {
+	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, catalogId, conceptId, updateId)
 	if err != nil {
 		logrus.Error("Unable to get concept update")
 		logging.LogAndPrintError(err)

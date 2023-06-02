@@ -20,7 +20,7 @@ tags:
 servers:
   - url: 'https://catalog-history.fellesdatakatalog.digdir.no'
 paths:
-  /concepts/{conceptId}/updates:
+  /{catalogId}/concepts/{conceptId}/updates:
     post:
       tags:
         - catalog-history-service
@@ -28,6 +28,12 @@ paths:
       description: Adds update to concept history
       operationId: update
       parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
         - name: conceptId
           in: path
           description: concept id
@@ -50,6 +56,12 @@ paths:
       description: Returns a collection of updates
       operationId: getHistory
       parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
         - name: conceptId
           in: path
           description: concept id
@@ -93,13 +105,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Updates'
-  /concepts/{conceptId}/updates/{updateId}:
+  /{catalogId}/concepts/{conceptId}/updates/{updateId}:
     get:
       tags:
         - catalog-history-service
       description: Get update diff
       operationId: getUpdateDiff
       parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
         - name: conceptId
           in: path
           description: concept id
@@ -128,7 +146,7 @@ components:
       properties:
         person:
           $ref: "#/components/schemas/Person"
-          description: Person who updated the document        
+          description: Person who updated the document
         operations:
           type: array
           items:
@@ -147,7 +165,7 @@ components:
           description: resource id
         person:
           $ref: "#/components/schemas/Person"
-          description: Person who updated the document 
+          description: Person who updated the document
         datetime:
           type: string
           format: date

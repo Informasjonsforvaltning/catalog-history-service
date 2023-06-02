@@ -7,6 +7,7 @@ import (
 
 type Update struct {
 	ID         string               `bson:"_id" json:"id"`
+	CatalogId  string               `bson:"catalogId" json:"catalogId"`
 	ResourceId string               `bson:"resourceId" json:"resourceId"`
 	Person     Person               `bson:"person" json:"person"`
 	DateTime   time.Time            `bson:"datetime" json:"datetime"`
