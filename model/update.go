@@ -6,11 +6,11 @@ import (
 )
 
 type Update struct {
-	ID         string               `json:"id"`
-	ResourceId string               `json:"resourceId"`
-	Person     Person               `json:"person"`
-	DateTime   time.Time            `json:"datetime"`
-	Operations []JsonPatchOperation `json:"operations"`
+	ID         string               `bson:"_id" json:"id"`
+	ResourceId string               `bson:"resourceId" json:"resourceId"`
+	Person     Person               `bson:"person" json:"person"`
+	DateTime   time.Time            `bson:"datetime" json:"datetime"`
+	Operations []JsonPatchOperation `bson:"operations" json:"operations"`
 }
 
 type UpdatePayload struct {
@@ -30,13 +30,13 @@ type Updates struct {
 }
 
 type Person struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
+	ID    string `bson:"id" json:"id"`
+	Email string `bson:"email" json:"email"`
+	Name  string `bson:"name" json:"name"`
 }
 
 type JsonPatchOperation struct {
-	Op    string `json:"op"`
-	Path  string `json:"path"`
-	Value string `json:"value"`
+	Op    string `bson:"op" json:"op"`
+	Path  string `bson:"path" json:"path"`
+	Value string `bson:"value" json:"value"`
 }

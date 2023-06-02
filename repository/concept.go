@@ -78,7 +78,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 }
 
 func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, conceptId string, updateId string) (*model.Update, error) {
-	filter := bson.D{{Key: "id", Value: updateId}, {Key: "resourceId", Value: conceptId}}
+	filter := bson.D{{Key: "_id", Value: updateId}, {Key: "resourceId", Value: conceptId}}
 
 	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
 	logrus.Info("Starting to get concept update from database")
