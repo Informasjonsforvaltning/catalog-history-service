@@ -13,32 +13,31 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type ConceptsRepository interface {
-	StoreConcept(ctx context.Context, update model.Update) error
-	GetConceptUpdates(ctx context.Context, query bson.D) ([]model.Update, error)
-	GetConceptUpdate(ctx context.Context, id string) (*model.Update, error)
+type UpdateRepository interface {
+	StoreUpdate(ctx context.Context, update model.Update) error
+	GetUpdates(ctx context.Context, query bson.D, page int, size int, sortBy string, sortOrder int) ([]model.Update, error)
+	GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string) (*model.Update, error)
 }
 
-// conceptsRepository is a struct that holds a reference to a MongoDB collection
-type ConceptsRepositoryImp struct {
+type UpdateRepositoryImpl struct {
 	collection *mongo.Collection
 }
 
-var conceptsRepository *ConceptsRepositoryImp
+var updateRepository *UpdateRepositoryImpl
 
-func InitRepository() *ConceptsRepositoryImp {
-	if conceptsRepository == nil {
-		conceptsRepository = &ConceptsRepositoryImp{collection: mongodb.Collection()}
+func InitRepository() *UpdateRepositoryImpl {
+	if updateRepository == nil {
+		updateRepository = &UpdateRepositoryImpl{collection: mongodb.Collection()}
 	}
-	return conceptsRepository
+	return updateRepository
 }
 
-func (r *ConceptsRepositoryImp) StoreConcept(ctx context.Context, update model.Update) error {
+func (r UpdateRepositoryImpl) StoreUpdate(ctx context.Context, update model.Update) error {
 	_, err := r.collection.InsertOne(ctx, update, nil)
 	return err
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson.D, page int, size int, sortBy string, sortOrder int) ([]model.Update, error) {
+func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, query bson.D, page int, size int, sortBy string, sortOrder int) ([]model.Update, error) {
 	skip := (page - 1) * size
 
 	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(size))
@@ -77,18 +76,18 @@ func (r ConceptsRepositoryImp) GetConceptUpdates(ctx context.Context, query bson
 	return updates, nil
 }
 
-func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, catalogId string, conceptId string, updateId string) (*model.Update, error) {
-	filter := bson.D{{Key: "_id", Value: updateId}, {Key: "catalogId", Value: catalogId}, {Key: "resourceId", Value: conceptId}}
+func (r UpdateRepositoryImpl) GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string) (*model.Update, error) {
+	filter := bson.D{{Key: "_id", Value: updateId}, {Key: "catalogId", Value: catalogId}, {Key: "resourceId", Value: resourceId}}
 
 	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
-	logrus.Info("Starting to get concept update from database")
+	logrus.Info("Starting to get update from database")
 	if err == mongo.ErrNoDocuments {
-		logrus.Error("concept update not found in db")
+		logrus.Error("update not found in db")
 		logging.LogAndPrintError(err)
 		return nil, nil
 	}
 	if err != nil {
-		logrus.Errorf("error when getting concept from db: %s", err)
+		logrus.Errorf("error when getting update from db: %s", err)
 		logging.LogAndPrintError(err)
 		return nil, err
 	}
@@ -96,7 +95,7 @@ func (r ConceptsRepositoryImp) GetConceptUpdate(ctx context.Context, catalogId s
 	var update model.Update
 	unmarshalError := bson.Unmarshal(bytes, &update)
 	if unmarshalError != nil {
-		logrus.Errorf("error when unmarshalling concept from db: %s", unmarshalError)
+		logrus.Errorf("error when unmarshalling update from db: %s", unmarshalError)
 		logging.LogAndPrintError(unmarshalError)
 		return nil, unmarshalError
 	}

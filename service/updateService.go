@@ -15,56 +15,58 @@ import (
 )
 
 type UpdateService interface {
-	StoreUpdate(ctx context.Context, bytes []byte)
+	StoreUpdate(ctx context.Context, bytes []byte, catalogId string, resourceId string)
+	GetUpdates(ctx context.Context, catalogId string, resourceId string, page int, size int, sortBy string, sortOrder string)
+	GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string)
 }
 
-type UpdateServiceImp struct {
-	ConceptsRepository repository.ConceptsRepositoryImp
+type UpdateServiceImpl struct {
+	UpdateRepository repository.UpdateRepository
 }
 
-func InitUpdateService() *UpdateServiceImp {
-	service := UpdateServiceImp{
-		ConceptsRepository: *repository.InitRepository(),
+func InitUpdateService() *UpdateServiceImpl {
+	service := UpdateServiceImpl{
+		UpdateRepository: *repository.InitRepository(),
 	}
 	return &service
 }
 
-func (service *UpdateServiceImp) StoreConceptUpdate(ctx context.Context, bytes []byte, catalogId string, conceptId string) (*string, error) {
+func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, catalogId string, resourceId string) (string, error) {
 	var update model.UpdatePayload
 	err := json.Unmarshal(bytes, &update)
 	logrus.Info("Unmarshalled update")
 	if err != nil {
-		logrus.Error("Unable to unmarshal concept update")
+		logrus.Error("Unable to unmarshal update")
 		logging.LogAndPrintError(err)
-		return nil, err
+		return "", err
 	}
 	err = update.Validate()
 	if err != nil {
-		logrus.Error("Concept update is not valid")
+		logrus.Error("update is not valid")
 		logging.LogAndPrintError(err)
-		return nil, err
+		return "", err
 	}
 	var updateDbo = model.Update{
 		ID:         uuid.New().String(),
 		CatalogId:  catalogId,
-		ResourceId: conceptId,
+		ResourceId: resourceId,
 		DateTime:   time.Now(),
 		Person:     update.Person,
 		Operations: update.Operations,
 	}
-	err = service.ConceptsRepository.StoreConcept(ctx, updateDbo)
+	err = service.UpdateRepository.StoreUpdate(ctx, updateDbo)
 	if err != nil {
-		logrus.Error("Could not store concept update")
+		logrus.Error("Could not store update")
 		logging.LogAndPrintError(err)
-		return nil, err
+		return "", err
 	}
-	return &updateDbo.ID, nil
+	return updateDbo.ID, nil
 }
 
-func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, catalogId string, conceptId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
+func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId string, resourceId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
 	query := bson.D{}
 	query = append(query, bson.E{Key: "catalogId", Value: catalogId})
-	query = append(query, bson.E{Key: "resourceId", Value: conceptId})
+	query = append(query, bson.E{Key: "resourceId", Value: resourceId})
 
 	// Set default sort by column to "datetime"
 	sortByCol := "datetime"
@@ -81,36 +83,35 @@ func (service *UpdateServiceImp) GetConceptUpdates(ctx context.Context, catalogI
 		sortOrderInt = 1
 	}
 
-	databaseUpdates, err := service.ConceptsRepository.GetConceptUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
+	databaseUpdates, err := service.UpdateRepository.GetUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
 	if err != nil {
-		logrus.Error("Get concept updates failed")
+		logrus.Error("Get updates failed")
 		logging.LogAndPrintError(err)
 		return model.Updates{}, http.StatusInternalServerError
 	}
 
 	if databaseUpdates == nil {
-		logrus.Error("No concept updates found")
+		logrus.Error("No updates found")
 		logging.LogAndPrintError(err)
 		return model.Updates{Updates: []model.Update{}}, http.StatusOK
 	} else {
-		logrus.Info("Returning concept updates")
+		logrus.Info("Returning updates")
 		logging.LogAndPrintError(err)
 		return model.Updates{Updates: databaseUpdates}, http.StatusOK
 	}
 }
 
-// function to get a update from database
-func (service *UpdateServiceImp) GetConceptUpdate(ctx context.Context, catalogId string, conceptId string, updateId string) (*model.Update, int) {
-	conceptUpdate, err := service.ConceptsRepository.GetConceptUpdate(ctx, catalogId, conceptId, updateId)
+func (service UpdateServiceImpl) GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string) (*model.Update, int) {
+	update, err := service.UpdateRepository.GetUpdate(ctx, catalogId, resourceId, updateId)
 	if err != nil {
-		logrus.Error("Unable to get concept update")
+		logrus.Error("Unable to get update")
 		logging.LogAndPrintError(err)
 		return nil, http.StatusInternalServerError
-	} else if conceptUpdate == nil {
-		logrus.Error("Concept update not found")
+	} else if update == nil {
+		logrus.Error("update not found")
 		logging.LogAndPrintError(err)
 		return nil, http.StatusNotFound
 	} else {
-		return conceptUpdate, http.StatusOK
+		return update, http.StatusOK
 	}
 }

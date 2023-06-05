@@ -20,13 +20,13 @@ tags:
 servers:
   - url: 'https://catalog-history.fellesdatakatalog.digdir.no'
 paths:
-  /{catalogId}/concepts/{conceptId}/updates:
+  /{catalogId}/{resourceId}/updates:
     post:
       tags:
         - catalog-history-service
-      summary: Add update to concept
-      description: Adds update to concept history
-      operationId: update
+      summary: Add update to resource
+      description: Adds update to resource history
+      operationId: storeUpdate
       parameters:
         - name: catalogId
           in: path
@@ -34,9 +34,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: conceptId
+        - name: resourceId
           in: path
-          description: concept id
+          description: resource id
           required: true
           schema:
             type: string
@@ -54,7 +54,7 @@ paths:
         - catalog-history-service
       summary: Query for update history.
       description: Returns a collection of updates
-      operationId: getHistory
+      operationId: getUpdates
       parameters:
         - name: catalogId
           in: path
@@ -62,9 +62,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: conceptId
+        - name: resourceId
           in: path
-          description: concept id
+          description: resource id
           required: true
           schema:
             type: string
@@ -105,12 +105,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Updates'
-  /{catalogId}/concepts/{conceptId}/updates/{updateId}:
+  /{catalogId}/{resourceId}/updates/{updateId}:
     get:
       tags:
         - catalog-history-service
-      description: Get update diff
-      operationId: getUpdateDiff
+      description: Get specific update
+      operationId: getUpdate
       parameters:
         - name: catalogId
           in: path
@@ -118,9 +118,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: conceptId
+        - name: resourceId
           in: path
-          description: concept id
+          description: resource id
           required: true
           schema:
             type: string
