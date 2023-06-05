@@ -12,12 +12,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetConcepts(t *testing.T) {
+func TestGetUpdates(t *testing.T) {
 	router := config.SetupRouter()
 
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &TestValues.SysAdminAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/111222333/concepts/123456789/updates", nil)
+	req, _ := http.NewRequest("GET", "/111222333/123456789/updates", nil)
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -29,13 +29,13 @@ func TestGetConcepts(t *testing.T) {
 	assert.True(t, len(actualResponse.Updates) > 0)
 }
 
-func TestGetConceptUpdatesWithPagination(t *testing.T) {
+func TestGetUpdatesWithPagination(t *testing.T) {
 	router := config.SetupRouter()
 
 	orgReadAuth := OrgReadAuth("111222333")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgReadAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/111222333/concepts/123456789/updates?page=1&size=2", nil)
+	req, _ := http.NewRequest("GET", "/111222333/123456789/updates?page=1&size=2", nil)
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -51,7 +51,7 @@ func TestGetListUnauthorizedWhenMissingAuthHeader(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/111222333/concepts/123456789/updates", nil)
+	req, _ := http.NewRequest("GET", "/111222333/123456789/updates", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
@@ -62,7 +62,7 @@ func TestGetListForbiddenForRoleInWrongCatalog(t *testing.T) {
 	orgAdminAuth := OrgAdminAuth("333222111")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgAdminAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/111222333/concepts/123456789/updates", nil)
+	req, _ := http.NewRequest("GET", "/111222333/123456789/updates", nil)
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 

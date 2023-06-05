@@ -1,6 +1,6 @@
 db = db.getSiblingDB('catalog-history-service');
-db.createCollection('concepts');
-db.concepts.insert(
+db.createCollection('updates');
+db.updates.insert(
     {
         "_id": "123",
         "catalogId": "111222333",
@@ -30,7 +30,7 @@ db.concepts.insert(
     }
 );
 
-db.concepts.insert(
+db.updates.insert(
     {
         "_id": "789",
         "catalogId": "111222333",
@@ -51,7 +51,7 @@ db.concepts.insert(
     }
 );
 
-db.concepts.insert(
+db.updates.insert(
     {
         "_id": "456",
         "catalogId": "111222333",
@@ -72,7 +72,7 @@ db.concepts.insert(
     }
 );
 
-db.concepts.insert(
+db.updates.insert(
     {
         "_id": "012",
         "catalogId": "111222333",

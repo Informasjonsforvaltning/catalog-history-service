@@ -39,7 +39,7 @@ func TestCreateUpdate(t *testing.T) {
 	orgAdminAuth := OrgAdminAuth("111222333")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgAdminAuth, &TestValues.Audience)
 	body, _ := json.Marshal(toBeCreated)
-	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/111222333/123456789/updates", bytes.NewBuffer(body))
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 
@@ -65,7 +65,7 @@ func TestCreateUnauthorizedWhenMissingAuthHeader(t *testing.T) {
 	toBeCreated := model.UpdatePayload{}
 
 	body, _ := json.Marshal(toBeCreated)
-	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/111222333/123456789/updates", bytes.NewBuffer(body))
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -80,7 +80,7 @@ func TestCreateForbiddenForReadRole(t *testing.T) {
 	body, _ := json.Marshal(toBeCreated)
 	orgReadAuth := OrgReadAuth("111222333")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgReadAuth, &TestValues.Audience)
-	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/111222333/123456789/updates", bytes.NewBuffer(body))
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 
@@ -96,7 +96,7 @@ func TestCreateForbiddenForRoleInWrongCatalog(t *testing.T) {
 	body, _ := json.Marshal(toBeCreated)
 	orgAdminAuth := OrgAdminAuth("333222111")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgAdminAuth, &TestValues.Audience)
-	req, _ := http.NewRequest("POST", "/111222333/concepts/123456789/updates", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/111222333/123456789/updates", bytes.NewBuffer(body))
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 

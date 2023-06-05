@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,11 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetConceptUpdatesHandler() func(c *gin.Context) {
+func GetUpdates() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
 		catalogId := c.Param("catalogId")
-		conceptId := c.Param("conceptId")
+		resourceId := c.Param("resourceId")
 
 		page, err := strconv.Atoi(c.Query("page"))
 		if err != nil {
@@ -26,38 +27,38 @@ func GetConceptUpdatesHandler() func(c *gin.Context) {
 			size = 10
 		}
 
-		concepts, status := updateService.GetConceptUpdates(c.Request.Context(), catalogId, conceptId, page, size, c.Query("sort_by"), c.Query("sort_order"))
+		updates, status := updateService.GetUpdates(c.Request.Context(), catalogId, resourceId, page, size, c.Query("sort_by"), c.Query("sort_order"))
 		if status == http.StatusOK {
-			c.JSON(status, concepts)
+			c.JSON(status, updates)
 		} else {
 			c.Status(status)
 		}
 	}
 }
 
-func GetConceptUpdateHandler() func(c *gin.Context) {
+func GetUpdate() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
 		catalogId := c.Param("catalogId")
-		conceptId := c.Param("conceptId")
+		resourceId := c.Param("resourceId")
 		updateId := c.Param("updateId")
-		logrus.Infof("Get update %s for concept %s", updateId, conceptId)
+		logrus.Infof("Get update %s for resource %s", updateId, resourceId)
 
-		concept, status := updateService.GetConceptUpdate(c.Request.Context(), catalogId, conceptId, updateId)
+		update, status := updateService.GetUpdate(c.Request.Context(), catalogId, resourceId, updateId)
 		if status == http.StatusOK {
-			c.JSON(status, concept)
+			c.JSON(status, update)
 		} else {
 			c.Status(status)
 		}
 	}
 }
 
-func PostConceptUpdate() func(c *gin.Context) {
+func StoreUpdate() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {
 		catalogId := c.Param("catalogId")
-		conceptId := c.Param("conceptId")
-		logrus.Infof("Update for concept %s received.", conceptId)
+		resourceId := c.Param("resourceId")
+		logrus.Infof("Update for resource %s received.", resourceId)
 		bytes, err := c.GetRawData()
 
 		if err != nil {
@@ -66,9 +67,9 @@ func PostConceptUpdate() func(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, err.Error())
 		} else {
-			newId, err := updateService.StoreConceptUpdate(c.Request.Context(), bytes, catalogId, conceptId)
+			newId, err := updateService.StoreUpdate(c.Request.Context(), bytes, catalogId, resourceId)
 			if err == nil {
-				c.Writer.Header().Add("Location", "/"+catalogId+"/concepts/"+conceptId+"/updates/"+*newId)
+				c.Writer.Header().Add("Location", fmt.Sprintf("/%s/%s/updates/%s", catalogId, resourceId, newId))
 				c.JSON(http.StatusCreated, nil)
 			} else {
 				c.JSON(http.StatusInternalServerError, err.Error())

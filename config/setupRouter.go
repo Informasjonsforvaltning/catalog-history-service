@@ -16,9 +16,9 @@ func InitializeRoutes(e *gin.Engine) {
 	}
 	e.GET(env.PathValues.Ping, handlers.PingHandler())
 	e.GET(env.PathValues.Ready, handlers.ReadyHandler())
-	e.POST(env.PathValues.Concept, security.RequireWriteAuth(), handlers.PostConceptUpdate())
-	e.GET(env.PathValues.Concept, security.RequireReadAuth(), handlers.GetConceptUpdatesHandler())
-	e.GET(env.PathValues.ConceptUpdate, security.RequireReadAuth(), handlers.GetConceptUpdateHandler())
+	e.POST(env.PathValues.Resource, security.RequireWriteAuth(), handlers.StoreUpdate())
+	e.GET(env.PathValues.Resource, security.RequireReadAuth(), handlers.GetUpdates())
+	e.GET(env.PathValues.ResourceUpdate, security.RequireReadAuth(), handlers.GetUpdate())
 }
 
 func SetupRouter() *gin.Engine {

@@ -32,10 +32,10 @@ type Constants struct {
 }
 
 type Paths struct {
-	Concept       string
-	ConceptUpdate string
-	Ping          string
-	Ready         string
+	Resource       string
+	ResourceUpdate string
+	Ping           string
+	Ready          string
 }
 
 type Security struct {
@@ -49,15 +49,15 @@ type Security struct {
 
 var ConstantValues = Constants{
 	MongoAuthParams: "authSource=admin&authMechanism=SCRAM-SHA-1",
-	MongoCollection: "concepts",
+	MongoCollection: "updates",
 	MongoDatabase:   "catalog-history-service",
 }
 
 var PathValues = Paths{
-	Concept:       "/:catalogId/concepts/:conceptId/updates",
-	ConceptUpdate: "/:catalogId/concepts/:conceptId/updates/:updateId",
-	Ping:          "/ping",
-	Ready:         "/ready",
+	Resource:       "/:catalogId/:resourceId/updates",
+	ResourceUpdate: "/:catalogId/:resourceId/updates/:updateId",
+	Ping:           "/ping",
+	Ready:          "/ready",
 }
 
 var SecurityValues = Security{
