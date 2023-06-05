@@ -47,7 +47,7 @@ func TestGetUpdatesWithPagination(t *testing.T) {
 	assert.Equal(t, 2, len(actualResponse.Updates))
 }
 
-func TestGetListUnauthorizedWhenMissingAuthHeader(t *testing.T) {
+func TestGetUpdatesUnauthorizedWhenMissingAuthHeader(t *testing.T) {
 	router := config.SetupRouter()
 
 	w := httptest.NewRecorder()
@@ -56,7 +56,7 @@ func TestGetListUnauthorizedWhenMissingAuthHeader(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-func TestGetListForbiddenForRoleInWrongCatalog(t *testing.T) {
+func TestGetUpdatesForbiddenForRoleInWrongCatalog(t *testing.T) {
 	router := config.SetupRouter()
 
 	orgAdminAuth := OrgAdminAuth("333222111")
