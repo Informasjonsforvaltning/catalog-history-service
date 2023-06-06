@@ -22,7 +22,7 @@ func MongoUsername() string {
 }
 
 func KeycloakHost() string {
-	return getEnv("KEYCLOAK_HOST", "https://sso.staging.fellesdatakatalog.digdir.no")
+	return getEnv("SSO_AUTH_URI", "https://sso.staging.fellesdatakatalog.digdir.no/auth")
 }
 
 type Constants struct {
