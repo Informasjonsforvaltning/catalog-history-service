@@ -39,5 +39,5 @@ type Person struct {
 type JsonPatchOperation struct {
 	Op    string `bson:"op" json:"op"`
 	Path  string `bson:"path" json:"path"`
-	Value string `bson:"value" json:"value"`
+	Value any    `bson:"value" json:"value"`
 }
