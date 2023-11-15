@@ -27,7 +27,14 @@ func (update UpdatePayload) Validate() error {
 }
 
 type Updates struct {
-	Updates []Update `json:"updates"`
+	Updates 	[]Update 	`json:"updates"`
+	Pagination 	Pagination 	`json:"pagination"`
+}
+
+type Pagination struct {	
+	TotalPages 	int `json:"totalPages"`
+	Page 		int `json:"page"`
+	Size 		int `json:"size"`
 }
 
 type Person struct {

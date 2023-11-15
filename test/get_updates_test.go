@@ -27,6 +27,9 @@ func TestGetUpdates(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, len(actualResponse.Updates) > 0)
+	assert.Equal(t, 1, actualResponse.Pagination.TotalPages)
+	assert.Equal(t, 1, actualResponse.Pagination.Page)
+	assert.Equal(t, 10, actualResponse.Pagination.Size)
 }
 
 func TestGetUpdatesWithPagination(t *testing.T) {
@@ -45,6 +48,9 @@ func TestGetUpdatesWithPagination(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(actualResponse.Updates))
+	assert.Equal(t, 3, actualResponse.Pagination.TotalPages)
+	assert.Equal(t, 1, actualResponse.Pagination.Page)
+	assert.Equal(t, 2, actualResponse.Pagination.Size)
 }
 
 func TestGetUpdatesUnauthorizedWhenMissingAuthHeader(t *testing.T) {
