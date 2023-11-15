@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
 	"time"
 
@@ -83,7 +84,7 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 		sortOrderInt = 1
 	}
 
-	databaseUpdates, err := service.UpdateRepository.GetUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
+	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
 	if err != nil {
 		logrus.Error("Get updates failed")
 		logging.LogAndPrintError(err)
@@ -93,11 +94,14 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 	if databaseUpdates == nil {
 		logrus.Error("No updates found")
 		logging.LogAndPrintError(err)
-		return model.Updates{Updates: []model.Update{}}, http.StatusOK
+		pagination := model.Pagination{ TotalPages: 0, Page: page, Size: size }
+		return model.Updates{Updates: []model.Update{}, Pagination: pagination}, http.StatusOK
 	} else {
 		logrus.Info("Returning updates")
 		logging.LogAndPrintError(err)
-		return model.Updates{Updates: databaseUpdates}, http.StatusOK
+		totalPages := int(math.Ceil(float64(count) / float64(size)))
+		pagination := model.Pagination{ TotalPages: totalPages, Page: page, Size: size }
+		return model.Updates{Updates: databaseUpdates, Pagination: pagination}, http.StatusOK
 	}
 }
 
