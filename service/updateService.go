@@ -93,14 +93,12 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 
 	if databaseUpdates == nil {
 		logrus.Error("No updates found")
-		logging.LogAndPrintError(err)
-		pagination := model.Pagination{ TotalPages: 0, Page: page, Size: size }
+		pagination := model.Pagination{TotalPages: 0, Page: page, Size: size}
 		return model.Updates{Updates: []model.Update{}, Pagination: pagination}, http.StatusOK
 	} else {
-		logrus.Info("Returning updates")
-		logging.LogAndPrintError(err)
+		logrus.Debug("Returning updates")
 		totalPages := int(math.Ceil(float64(count) / float64(size)))
-		pagination := model.Pagination{ TotalPages: totalPages, Page: page, Size: size }
+		pagination := model.Pagination{TotalPages: totalPages, Page: page, Size: size}
 		return model.Updates{Updates: databaseUpdates, Pagination: pagination}, http.StatusOK
 	}
 }
@@ -113,7 +111,6 @@ func (service UpdateServiceImpl) GetUpdate(ctx context.Context, catalogId string
 		return nil, http.StatusInternalServerError
 	} else if update == nil {
 		logrus.Error("update not found")
-		logging.LogAndPrintError(err)
 		return nil, http.StatusNotFound
 	} else {
 		return update, http.StatusOK
