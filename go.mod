@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/lestrrat-go/jwx v1.2.25
 	github.com/ory/dockertest/v3 v3.9.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
