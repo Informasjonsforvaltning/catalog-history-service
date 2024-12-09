@@ -3,7 +3,9 @@ package config
 import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/security"
 	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/env"
 	"github.com/Informasjonsforvaltning/catalog-history-service/handlers"
@@ -24,7 +26,16 @@ func InitializeRoutes(e *gin.Engine) {
 func SetupRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
-
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     env.CorsOriginPatterns(),
+		AllowMethods:     []string{"OPTIONS", "GET", "POST"},
+		AllowHeaders:     []string{"*"},
+		AllowWildcard:    true,
+		AllowAllOrigins:  false,
+		AllowCredentials: false,
+		AllowFiles:       false,
+		MaxAge:           1 * time.Hour,
+	}))
 	InitializeRoutes(router)
 	return router
 }
