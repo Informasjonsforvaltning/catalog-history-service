@@ -3,7 +3,7 @@ module github.com/Informasjonsforvaltning/catalog-history-service
 go 1.23
 
 require (
-	cloud.google.com/go/errorreporting v0.3.1
+	cloud.google.com/go/errorreporting v0.3.2
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/gin-contrib/cors v1.7.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
