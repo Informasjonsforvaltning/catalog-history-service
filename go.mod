@@ -5,7 +5,7 @@ go 1.23
 require (
 	cloud.google.com/go/errorreporting v0.3.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
-	github.com/gin-contrib/cors v1.7.2
+	github.com/gin-contrib/cors v1.7.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/lestrrat-go/jwx v1.2.29
@@ -47,7 +47,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
-	github.com/bytedance/sonic v1.12.5 // indirect
+	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -61,7 +61,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.23.0 // indirect
-	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/goccy/go-json v0.10.4 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -98,8 +98,8 @@ require (
 	go.mongodb.org/mongo-driver v1.17.1
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/arch v0.12.0 // indirect
-	golang.org/x/crypto v0.30.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
@@ -108,7 +108,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/grpc v1.68.1 // indirect
-	google.golang.org/protobuf v1.35.2 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
