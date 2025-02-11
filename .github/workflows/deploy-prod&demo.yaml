@@ -7,8 +7,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy-production:
-    name: Deploy to prod on merge to main branch
+  run-tests:
+    name: Run tests
+    uses: Informasjonsforvaltning/workflows/.github/workflows/coverage-go.yaml@main
+    with:
+      go_version: 1.23.6
+      coverage_file_path: ./coverage.txt
+      test_path: ./test
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build-push-prod:
+    name: Build and push to ghcr on merge to main branch
     uses: Informasjonsforvaltning/workflows/.github/workflows/build-push.yaml@main
     with:
       app_name: catalog-history-service
@@ -19,8 +30,21 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  deploy-to-prod:
+    needs: build-push-prod
+    name: Deploy to prod
+    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
+    with:
+      app_name: catalog-history-service
+      environment: prod
+      cluster: digdir-fdk-prod
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DIGDIR_FDK_AUTODEPLOY: ${{ secrets.DIGDIR_FDK_PROD_AUTODEPLOY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
   deploy-to-demo:
-    needs: build-and-deploy-production
+    needs: deploy-to-prod
     name: Deploy to demo if prod-deploy is successful
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
@@ -30,18 +54,4 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DIGDIR_FDK_AUTODEPLOY: ${{ secrets.DIGDIR_FDK_DEV_AUTODEPLOY }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      DEPENDABOT_SLACK_WEBHOOK_URL: ${{ secrets.DEPENDABOT_SLACK_WEBHOOK_URL }}
-
-  deploy-to-prod:
-    needs: build-and-deploy-production
-    name: Deploy to prod if prod-deploy is successful
-    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
-    with:
-      app_name: catalog-history-service
-      environment: prod
-      cluster: digdir-fdk-prod
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      DIGDIR_FDK_AUTODEPLOY: ${{ secrets.DIGDIR_FDK_PROD_AUTODEPLOY }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
