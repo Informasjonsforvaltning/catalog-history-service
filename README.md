@@ -1,28 +1,51 @@
-# catalog-history-service
+# Catalog History Service
 
-## To run locally
+This application provides an API to keep track of changes (JSON Patch operations) to datasets, dataservices, concepts
+and services.
 
-To run the catalog history service locally, you will need to have Go (version 1.17 or higher) installed on your machine.
+For a broader understanding of the system’s context, refer to
+the [architecture documentation](https://github.com/Informasjonsforvaltning/architecture-documentation) wiki. For more
+specific context on this application, see the **Registration** subsystem section.
 
-### Start the service
+## Getting Started
 
-To start the service, follow these steps:
+These instructions will give you a copy of the project up and running on your local machine for development and testing
+purposes.
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- Go (version 1.17 or higher)
+- Docker
+
+### Running locally
+
+Clone the repository.
+
+```sh
+git clone https://github.com/Informasjonsforvaltning/catalog-history-service.git
+cd catalog-history-service
+```
 
 Run `go get` to install the required dependencies.
-Run `go run main.go` to start the service.
 
 ```shell
 go get
+```
+
+Start MongoDB and the application (either through your IDE, or via CLI):
+
+```sh
+docker compose up -d
 go run main.go
 ```
 
-To start the service with docker-compose:
+### API Documentation (OpenAPI)
 
-Run `docker-compose up -d --build` to start the service and build the required images.
+The API documentation is available at ```openapi.yaml```.
 
-### Testing
-
-To run the tests for the service, use the following command:
+### Running tests
 
 ```shell
 go test ./test
@@ -33,17 +56,3 @@ To generate a test coverage report, use the following command:
 ```shell
 go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./test
 ```
-
-### Check that service is running
-
-To check that the service is running, you can send a GET request to the /ping endpoint using curl:
-
-```shell
-curl -X 'GET' \
-  'localhost:8080/ping' \
-  -H 'accept: application/json'
-```
-
-### Deployment
-
-We use kustomize to deploy the service. All yaml files are located in the ./deploy folder.
