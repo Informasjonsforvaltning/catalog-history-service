@@ -6,6 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/mongodb"
 	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
@@ -20,6 +22,7 @@ type UpdateRepository interface {
 }
 
 type UpdateRepositoryImpl struct {
+	client     *mongo.Client
 	collection *mongo.Collection
 }
 
@@ -27,14 +30,31 @@ var updateRepository *UpdateRepositoryImpl
 
 func InitRepository() *UpdateRepositoryImpl {
 	if updateRepository == nil {
-		updateRepository = &UpdateRepositoryImpl{collection: mongodb.Collection()}
+		client := mongodb.MongoClient()
+		updateRepository = &UpdateRepositoryImpl{client: client, collection: mongodb.Collection(client)}
 	}
 	return updateRepository
 }
 
 func (r UpdateRepositoryImpl) StoreUpdate(ctx context.Context, update model.Update) error {
-	_, err := r.collection.InsertOne(ctx, update, nil)
-	return err
+	return r.client.UseSession(ctx, func(sctx mongo.SessionContext) error {
+		err := sctx.StartTransaction(options.Transaction().
+			SetReadConcern(readconcern.Snapshot()).
+			SetWriteConcern(writeconcern.Majority()),
+		)
+
+		if err != nil {
+			return err
+		}
+
+		_, err = r.collection.InsertOne(ctx, update, nil)
+		if err != nil {
+			sctx.AbortTransaction(sctx)
+			return err
+		} else {
+			return nil
+		}
+	})
 }
 
 func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, query bson.D, page int, size int, sortBy string, sortOrder int) ([]model.Update, int64, error) {
@@ -79,7 +99,7 @@ func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, query bson.D, page
 		logging.LogAndPrintError(err)
 		return nil, 0, err
 	}
-	
+
 	return updates, count, nil
 }
 
