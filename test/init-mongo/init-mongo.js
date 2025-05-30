@@ -1,4 +1,4 @@
-db = db.getSiblingDB('catalog-history-service');
+db = db.getSiblingDB('catalogHistory');
 db.createCollection('updates');
 db.updates.insert(
     {

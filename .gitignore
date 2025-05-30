@@ -16,3 +16,5 @@
 # vendor/
 .idea
 .go-version
+
+.DS_Store

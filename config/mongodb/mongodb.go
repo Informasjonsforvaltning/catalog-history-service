@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,28 +13,34 @@ import (
 )
 
 func ConnectionString() string {
-	authParams := env.ConstantValues.MongoAuthParams
-	dbName := env.ConstantValues.MongoDatabase
-	host := env.MongoHost()
-	password := env.MongoPassword()
-	user := env.MongoUsername()
+	var connectionString strings.Builder
+	connectionString.WriteString("mongodb://")
+	connectionString.WriteString(env.MongoUsername())
+	connectionString.WriteString(":")
+	connectionString.WriteString(env.MongoPassword())
+	connectionString.WriteString("@")
+	connectionString.WriteString(env.MongoHost())
+	connectionString.WriteString("/")
+	connectionString.WriteString(env.ConstantValues.MongoDatabase)
+	connectionString.WriteString("?authSource=")
+	connectionString.WriteString(env.MongoAuthSource())
+	connectionString.WriteString("&replicaSet=")
+	connectionString.WriteString(env.MongoReplicaSet())
 
-	connectionString := "mongodb://" + user + ":" + password + "@" + host + "/" + dbName + "?" + authParams
-
-	return connectionString
+	return connectionString.String()
 }
 
-func Collection() *mongo.Collection {
+func MongoClient() *mongo.Client {
 	mongoOptions := options.Client().ApplyURI(ConnectionString())
 	client, err := mongo.Connect(context.Background(), mongoOptions)
 	if err != nil {
 		logrus.Error("mongo client failed")
 		logging.LogAndPrintError(err)
 	}
-	if err != nil {
-		logrus.Error("mongo client mongodb failed")
-		logging.LogAndPrintError(err)
-	}
+	return client
+}
+
+func Collection(client *mongo.Client) *mongo.Collection {
 	collection := client.Database(env.ConstantValues.MongoDatabase).Collection(env.ConstantValues.MongoCollection)
 
 	return collection
