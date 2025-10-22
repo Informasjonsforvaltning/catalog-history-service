@@ -40,7 +40,7 @@ func OrgReadAuth(org string) string {
 
 func TestMain(m *testing.M) {
 	mockJwkStore := MockJwkStore()
-	os.Setenv("SSO_AUTH_URI", mockJwkStore.URL)
+	os.Setenv("SSO_BASE_URI", mockJwkStore.URL)
 
 	MongoContainerRunner(m)
 }
