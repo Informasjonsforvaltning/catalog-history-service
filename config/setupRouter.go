@@ -18,6 +18,7 @@ func InitializeRoutes(e *gin.Engine) {
 	}
 	e.GET(env.PathValues.Ping, handlers.PingHandler())
 	e.GET(env.PathValues.Ready, handlers.ReadyHandler())
+	// Validation is performed in the service/repository layer
 	e.POST(env.PathValues.Resource, security.RequireWriteAuth(), handlers.StoreUpdate())
 	e.GET(env.PathValues.Resource, security.RequireReadAuth(), handlers.GetUpdates())
 	e.GET(env.PathValues.ResourceUpdate, security.RequireReadAuth(), handlers.GetUpdate())
