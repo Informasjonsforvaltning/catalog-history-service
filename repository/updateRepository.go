@@ -58,12 +58,25 @@ func (r UpdateRepositoryImpl) StoreUpdate(ctx context.Context, update model.Upda
 }
 
 func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, query bson.D, page int, size int, sortBy string, sortOrder int) ([]model.Update, int64, error) {
+	// Defense-in-depth: Validate pagination and sort field even though they should be validated in service layer
+	// This ensures CodeQL and other static analysis tools can see the validation guard
+	// Primary validation happens in service layer
+	validatedPage, validatedSize, err := ValidatePagination(page, size)
+	if err != nil {
+		return nil, 0, err
+	}
+	page = validatedPage
+	size = validatedSize
+	
+	// Validate sort field to prevent injection
+	validatedSortBy := ValidateSortField(sortBy)
+	
 	skip := (page - 1) * size
-
 	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(size))
 
-	// Sort the results by the specified field and order
-	sort := bson.D{{Key: sortBy, Value: sortOrder}}
+	// Build sort using validated field name
+	// The MongoDB driver safely handles this as values are treated as literals, not code
+	sort := bson.D{{Key: validatedSortBy, Value: sortOrder}}
 	opts.SetSort(sort)
 
 	var updates []model.Update
@@ -104,10 +117,29 @@ func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, query bson.D, page
 }
 
 func (r UpdateRepositoryImpl) GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string) (*model.Update, error) {
+	logrus.Info("Starting to get update from database")
+	
+	// Defense-in-depth: Validate input parameters even though they should be validated in service layer
+	// This ensures CodeQL and other static analysis tools can see the validation guard
+	// Primary validation happens in service layer
+	if err := ValidateID(catalogId, "catalogId"); err != nil {
+		logrus.Errorf("Invalid catalogId: %v", err)
+		return nil, err
+	}
+	if err := ValidateID(resourceId, "resourceId"); err != nil {
+		logrus.Errorf("Invalid resourceId: %v", err)
+		return nil, err
+	}
+	if err := ValidateID(updateId, "updateId"); err != nil {
+		logrus.Errorf("Invalid updateId: %v", err)
+		return nil, err
+	}
+	
+	// Build query using bson.D - values are safely escaped by the MongoDB driver
+	// This prevents NoSQL injection as values are treated as literals, not code
 	filter := bson.D{{Key: "_id", Value: updateId}, {Key: "catalogId", Value: catalogId}, {Key: "resourceId", Value: resourceId}}
 
 	bytes, err := r.collection.FindOne(ctx, filter).DecodeBytes()
-	logrus.Info("Starting to get update from database")
 	if err == mongo.ErrNoDocuments {
 		logrus.Error("update not found in db")
 		logging.LogAndPrintError(err)

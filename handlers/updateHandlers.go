@@ -17,6 +17,7 @@ func GetUpdates() func(c *gin.Context) {
 		catalogId := c.Param("catalogId")
 		resourceId := c.Param("resourceId")
 
+		// Parse query parameters - validation happens in service layer
 		page, err := strconv.Atoi(c.Query("page"))
 		if err != nil {
 			page = 1
@@ -27,7 +28,10 @@ func GetUpdates() func(c *gin.Context) {
 			size = 10
 		}
 
-		updates, status := updateService.GetUpdates(c.Request.Context(), catalogId, resourceId, page, size, c.Query("sort_by"), c.Query("sort_order"))
+		sortBy := c.Query("sort_by")
+		sortOrder := c.Query("sort_order")
+
+		updates, status := updateService.GetUpdates(c.Request.Context(), catalogId, resourceId, page, size, sortBy, sortOrder)
 		if status == http.StatusOK {
 			c.JSON(status, updates)
 		} else {
@@ -42,6 +46,7 @@ func GetUpdate() func(c *gin.Context) {
 		catalogId := c.Param("catalogId")
 		resourceId := c.Param("resourceId")
 		updateId := c.Param("updateId")
+		// Validation happens in service/repository layer
 		logrus.Infof("Get update %s for resource %s", updateId, resourceId)
 
 		update, status := updateService.GetUpdate(c.Request.Context(), catalogId, resourceId, updateId)

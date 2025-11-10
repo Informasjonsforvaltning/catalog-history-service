@@ -33,6 +33,18 @@ func InitUpdateService() *UpdateServiceImpl {
 }
 
 func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, catalogId string, resourceId string) (string, error) {
+	// Validate input parameters to prevent NoSQL injection
+	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
+		logrus.Errorf("Invalid catalogId: %v", err)
+		logging.LogAndPrintError(err)
+		return "", err
+	}
+	if err := repository.ValidateID(resourceId, "resourceId"); err != nil {
+		logrus.Errorf("Invalid resourceId: %v", err)
+		logging.LogAndPrintError(err)
+		return "", err
+	}
+
 	var update model.UpdatePayload
 	err := json.Unmarshal(bytes, &update)
 	logrus.Info("Unmarshalled update")
@@ -65,17 +77,38 @@ func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, 
 }
 
 func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId string, resourceId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
-	query := bson.D{}
-	query = append(query, bson.E{Key: "catalogId", Value: catalogId})
-	query = append(query, bson.E{Key: "resourceId", Value: resourceId})
+	// Validate input parameters to prevent NoSQL injection and DoS attacks
+	// Validation errors are client errors, so return 400 Bad Request
+	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
+		logrus.Errorf("Invalid catalogId: %v", err)
+		logging.LogAndPrintError(err)
+		return model.Updates{}, http.StatusBadRequest
+	}
+	if err := repository.ValidateID(resourceId, "resourceId"); err != nil {
+		logrus.Errorf("Invalid resourceId: %v", err)
+		logging.LogAndPrintError(err)
+		return model.Updates{}, http.StatusBadRequest
+	}
 
-	// Set default sort by column to "datetime"
+	// Validate pagination parameters
+	validatedPage, validatedSize, err := repository.ValidatePagination(page, size)
+	if err != nil {
+		logrus.Errorf("Invalid pagination parameters: %v", err)
+		logging.LogAndPrintError(err)
+		return model.Updates{}, http.StatusBadRequest
+	}
+
+	// Validate and whitelist sort field to prevent injection attacks
+	// Only specific fields are allowed to prevent malicious field names
 	sortByCol := "datetime"
 	switch sortBy {
 	case "name":
 		sortByCol = "person.name"
 	case "email":
 		sortByCol = "person.email"
+	case "datetime":
+		sortByCol = "datetime"
+	// Any other value defaults to "datetime" for safety
 	}
 
 	// Map sortOrder string to integer value
@@ -84,7 +117,13 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 		sortOrderInt = 1
 	}
 
-	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, query, page, size, sortByCol, sortOrderInt)
+	// Build query using bson.D - values are safely escaped by the MongoDB driver
+	// This prevents NoSQL injection as values are treated as literals, not code
+	query := bson.D{}
+	query = append(query, bson.E{Key: "catalogId", Value: catalogId})
+	query = append(query, bson.E{Key: "resourceId", Value: resourceId})
+
+	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, query, validatedPage, validatedSize, sortByCol, sortOrderInt)
 	if err != nil {
 		logrus.Error("Get updates failed")
 		logging.LogAndPrintError(err)
@@ -93,17 +132,36 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 
 	if databaseUpdates == nil {
 		logrus.Error("No updates found")
-		pagination := model.Pagination{TotalPages: 0, Page: page, Size: size}
+		pagination := model.Pagination{TotalPages: 0, Page: validatedPage, Size: validatedSize}
 		return model.Updates{Updates: []model.Update{}, Pagination: pagination}, http.StatusOK
 	} else {
 		logrus.Debug("Returning updates")
-		totalPages := int(math.Ceil(float64(count) / float64(size)))
-		pagination := model.Pagination{TotalPages: totalPages, Page: page, Size: size}
+		// Use validated size for accurate pagination calculation
+		totalPages := int(math.Ceil(float64(count) / float64(validatedSize)))
+		pagination := model.Pagination{TotalPages: totalPages, Page: validatedPage, Size: validatedSize}
 		return model.Updates{Updates: databaseUpdates, Pagination: pagination}, http.StatusOK
 	}
 }
 
 func (service UpdateServiceImpl) GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string) (*model.Update, int) {
+	// Validate input parameters to prevent NoSQL injection
+	// Validation errors are client errors, so return 400 Bad Request
+	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
+		logrus.Errorf("Invalid catalogId: %v", err)
+		logging.LogAndPrintError(err)
+		return nil, http.StatusBadRequest
+	}
+	if err := repository.ValidateID(resourceId, "resourceId"); err != nil {
+		logrus.Errorf("Invalid resourceId: %v", err)
+		logging.LogAndPrintError(err)
+		return nil, http.StatusBadRequest
+	}
+	if err := repository.ValidateID(updateId, "updateId"); err != nil {
+		logrus.Errorf("Invalid updateId: %v", err)
+		logging.LogAndPrintError(err)
+		return nil, http.StatusBadRequest
+	}
+
 	update, err := service.UpdateRepository.GetUpdate(ctx, catalogId, resourceId, updateId)
 	if err != nil {
 		logrus.Error("Unable to get update")
