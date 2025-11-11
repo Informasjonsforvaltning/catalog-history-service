@@ -37,7 +37,7 @@ func MongoReplicaSet() string {
 }
 
 func KeycloakHost() string {
-	return getEnv("SSO_BASE_URI", "https://keycloak.staging.fellesdatakatalog.digdir.no")
+	return getEnv("SSO_BASE_URI", "https://auth.staging.fellesdatakatalog.digdir.no")
 }
 
 type Constants struct {
