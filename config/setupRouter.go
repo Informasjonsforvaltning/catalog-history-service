@@ -26,6 +26,9 @@ func InitializeRoutes(e *gin.Engine) {
 
 func SetupRouter() *gin.Engine {
 	router := gin.New()
+	router.RedirectFixedPath = false
+	router.RedirectTrailingSlash = false
+	router.RemoveExtraSlash = false
 	router.Use(gin.Recovery())
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     env.CorsOriginPatterns(),
