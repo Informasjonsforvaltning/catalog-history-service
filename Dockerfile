@@ -1,4 +1,4 @@
-FROM golang:1.25.4-alpine AS build-env
+FROM golang:1.25.5-alpine AS build-env
 
 ENV APP_NAME=catalog-history-service
 ENV CMD_PATH=main.go
