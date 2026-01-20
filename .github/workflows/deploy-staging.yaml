@@ -13,7 +13,7 @@ jobs:
     name: Run tests
     uses: Informasjonsforvaltning/workflows/.github/workflows/coverage-go.yaml@main
     with:
-      go_version: 1.25.4
+      go_version: 1.25.5
       coverage_file_path: ./coverage.txt
       test_path: ./test
     secrets:
