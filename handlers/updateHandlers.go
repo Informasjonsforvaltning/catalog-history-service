@@ -40,6 +40,34 @@ func GetUpdates() func(c *gin.Context) {
 	}
 }
 
+func GetConceptUpdates() func(c *gin.Context) {
+	updateService := service.InitUpdateService()
+	return func(c *gin.Context) {
+		catalogId := c.Param("catalogId")
+
+		// Parse query parameters - validation happens in service layer
+		page, err := strconv.Atoi(c.Query("page"))
+		if err != nil {
+			page = 1
+		}
+
+		size, err := strconv.Atoi(c.Query("size"))
+		if err != nil {
+			size = 10
+		}
+
+		sortBy := c.Query("sort_by")
+		sortOrder := c.Query("sort_order")
+
+		updates, status := updateService.GetConceptUpdates(c.Request.Context(), catalogId, page, size, sortBy, sortOrder)
+		if status == http.StatusOK {
+			c.JSON(status, updates)
+		} else {
+			c.Status(status)
+		}
+	}
+}
+
 func GetUpdate() func(c *gin.Context) {
 	updateService := service.InitUpdateService()
 	return func(c *gin.Context) {

@@ -49,6 +49,7 @@ type Constants struct {
 type Paths struct {
 	Resource       string
 	ResourceUpdate string
+	ConceptUpdates string
 	Ping           string
 	Ready          string
 }
@@ -71,6 +72,7 @@ var ConstantValues = Constants{
 var PathValues = Paths{
 	Resource:       "/:catalogId/:resourceId/updates",
 	ResourceUpdate: "/:catalogId/:resourceId/updates/:updateId",
+	ConceptUpdates: "/:catalogId/concepts/updates",
 	Ping:           "/ping",
 	Ready:          "/ready",
 }

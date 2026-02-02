@@ -19,6 +19,7 @@ type UpdateService interface {
 	StoreUpdate(ctx context.Context, bytes []byte, catalogId string, resourceId string)
 	GetUpdates(ctx context.Context, catalogId string, resourceId string, page int, size int, sortBy string, sortOrder string)
 	GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string)
+	GetConceptUpdates(ctx context.Context, catalogId string, page int, size int, sortBy string, sortOrder string)
 }
 
 type UpdateServiceImpl struct {
@@ -172,5 +173,60 @@ func (service UpdateServiceImpl) GetUpdate(ctx context.Context, catalogId string
 		return nil, http.StatusNotFound
 	} else {
 		return update, http.StatusOK
+	}
+}
+
+func (service UpdateServiceImpl) GetConceptUpdates(ctx context.Context, catalogId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
+	// Validate catalogId to prevent NoSQL injection
+	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
+		logrus.Errorf("Invalid catalogId: %v", err)
+		logging.LogAndPrintError(err)
+		return model.Updates{}, http.StatusBadRequest
+	}
+
+	// Validate pagination parameters
+	validatedPage, validatedSize, err := repository.ValidatePagination(page, size)
+	if err != nil {
+		logrus.Errorf("Invalid pagination parameters: %v", err)
+		logging.LogAndPrintError(err)
+		return model.Updates{}, http.StatusBadRequest
+	}
+
+	// Validate and whitelist sort field to prevent injection attacks
+	sortByCol := "datetime"
+	switch sortBy {
+	case "name":
+		sortByCol = "person.name"
+	case "email":
+		sortByCol = "person.email"
+	case "datetime":
+		sortByCol = "datetime"
+	}
+
+	// Map sortOrder string to integer value
+	sortOrderInt := -1
+	if sortOrder == "asc" {
+		sortOrderInt = 1
+	}
+
+	// Build query with catalogId only (no resourceId filter)
+	query := bson.D{{Key: "catalogId", Value: catalogId}}
+
+	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, query, validatedPage, validatedSize, sortByCol, sortOrderInt)
+	if err != nil {
+		logrus.Error("Get concept updates failed")
+		logging.LogAndPrintError(err)
+		return model.Updates{}, http.StatusInternalServerError
+	}
+
+	if databaseUpdates == nil {
+		logrus.Debug("No concept updates found")
+		pagination := model.Pagination{TotalPages: 0, Page: validatedPage, Size: validatedSize}
+		return model.Updates{Updates: []model.Update{}, Pagination: pagination}, http.StatusOK
+	} else {
+		logrus.Debug("Returning concept updates")
+		totalPages := int(math.Ceil(float64(count) / float64(validatedSize)))
+		pagination := model.Pagination{TotalPages: totalPages, Page: validatedPage, Size: validatedSize}
+		return model.Updates{Updates: databaseUpdates, Pagination: pagination}, http.StatusOK
 	}
 }
