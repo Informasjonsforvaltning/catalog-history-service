@@ -6,7 +6,7 @@ services:
     environment:
       - MONGODB_ROOT_PASSWORD=admin
       # Activate this if connecting from localhost
-      #      - MONGODB_ADVERTISED_HOSTNAME=localhost
+      - MONGODB_ADVERTISED_HOSTNAME=localhost
       - MONGODB_REPLICA_SET_MODE=primary
       - MONGODB_REPLICA_SET_KEY=replicaset
     ports:

@@ -22,6 +22,7 @@ func InitializeRoutes(e *gin.Engine) {
 	e.POST(env.PathValues.Resource, security.RequireWriteAuth(), handlers.StoreUpdate())
 	e.GET(env.PathValues.Resource, security.RequireReadAuth(), handlers.GetUpdates())
 	e.GET(env.PathValues.ResourceUpdate, security.RequireReadAuth(), handlers.GetUpdate())
+	e.GET(env.PathValues.ConceptUpdates, security.RequireReadAuth(), handlers.GetConceptUpdates())
 }
 
 func SetupRouter() *gin.Engine {
