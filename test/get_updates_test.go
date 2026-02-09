@@ -28,7 +28,7 @@ func TestGetUpdates(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, len(actualResponse.Updates) > 0)
 	assert.Equal(t, 1, actualResponse.Pagination.TotalPages)
-	assert.Equal(t, 1, actualResponse.Pagination.Page)
+	assert.Equal(t, 0, actualResponse.Pagination.Page)
 	assert.Equal(t, 10, actualResponse.Pagination.Size)
 }
 
@@ -38,7 +38,7 @@ func TestGetUpdatesWithPagination(t *testing.T) {
 	orgReadAuth := OrgReadAuth("111222333")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgReadAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/111222333/123456789/updates?page=1&size=2", nil)
+	req, _ := http.NewRequest("GET", "/111222333/123456789/updates?page=0&size=2", nil)
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -49,7 +49,7 @@ func TestGetUpdatesWithPagination(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(actualResponse.Updates))
 	assert.Equal(t, 3, actualResponse.Pagination.TotalPages)
-	assert.Equal(t, 1, actualResponse.Pagination.Page)
+	assert.Equal(t, 0, actualResponse.Pagination.Page)
 	assert.Equal(t, 2, actualResponse.Pagination.Size)
 }
 

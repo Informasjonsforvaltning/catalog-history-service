@@ -28,7 +28,7 @@ func TestGetConceptUpdates(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, len(actualResponse.Updates) > 0)
 	assert.Equal(t, 1, actualResponse.Pagination.TotalPages)
-	assert.Equal(t, 1, actualResponse.Pagination.Page)
+	assert.Equal(t, 0, actualResponse.Pagination.Page)
 	assert.Equal(t, 10, actualResponse.Pagination.Size)
 }
 
@@ -38,7 +38,7 @@ func TestGetConceptUpdatesWithPagination(t *testing.T) {
 	orgReadAuth := OrgReadAuth("111222333")
 	jwt := CreateMockJwt(time.Now().Add(time.Hour).Unix(), &orgReadAuth, &TestValues.Audience)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/111222333/concepts/updates?page=1&size=2", nil)
+	req, _ := http.NewRequest("GET", "/111222333/concepts/updates?page=0&size=2", nil)
 	req.Header.Set("Authorization", *jwt)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -50,7 +50,7 @@ func TestGetConceptUpdatesWithPagination(t *testing.T) {
 	assert.Equal(t, 2, len(actualResponse.Updates))
 	// TotalPages depends on test order (TestCreateUpdate may add documents)
 	assert.True(t, actualResponse.Pagination.TotalPages >= 2)
-	assert.Equal(t, 1, actualResponse.Pagination.Page)
+	assert.Equal(t, 0, actualResponse.Pagination.Page)
 	assert.Equal(t, 2, actualResponse.Pagination.Size)
 }
 

@@ -71,7 +71,7 @@ func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, query bson.D, page
 	// Validate sort field to prevent injection
 	validatedSortBy := ValidateSortField(sortBy)
 	
-	skip := (page - 1) * size
+	skip := page * size
 	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(size))
 
 	// Build sort using validated field name
