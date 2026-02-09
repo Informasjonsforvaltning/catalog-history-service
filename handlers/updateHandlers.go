@@ -20,7 +20,7 @@ func GetUpdates() func(c *gin.Context) {
 		// Parse query parameters - validation happens in service layer
 		page, err := strconv.Atoi(c.Query("page"))
 		if err != nil {
-			page = 1
+			page = 0
 		}
 
 		size, err := strconv.Atoi(c.Query("size"))
@@ -48,7 +48,7 @@ func GetConceptUpdates() func(c *gin.Context) {
 		// Parse query parameters - validation happens in service layer
 		page, err := strconv.Atoi(c.Query("page"))
 		if err != nil {
-			page = 1
+			page = 0
 		}
 
 		size, err := strconv.Atoi(c.Query("size"))

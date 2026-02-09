@@ -64,7 +64,7 @@ func ValidatePagination(page, size int) (int, int, error) {
 	// Set reasonable limits
 	const maxPage = 10000
 	const maxSize = 100
-	const minPage = 1
+	const minPage = 0
 	const minSize = 1
 	
 	if page < minPage {
