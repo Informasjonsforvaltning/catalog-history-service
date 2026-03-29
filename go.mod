@@ -5,7 +5,7 @@ go 1.25.5
 require (
 	cloud.google.com/go/errorreporting v0.4.0
 	github.com/Nerzal/gocloak/v13 v13.9.0
-	github.com/gin-contrib/cors v1.7.6
+	github.com/gin-contrib/cors v1.7.7
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/lestrrat-go/jwx v1.2.31
