@@ -3,10 +3,11 @@ package test
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
 	"testing"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -58,7 +59,7 @@ func MongoContainerRunner(m *testing.M) {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "bitnami/mongodb",
-		Tag:        "latest",
+		Tag:        "latest@sha256:5691a315a6a976881fc7fa9b206998b6da9ff10a75f75dbc3466ee7a498dc8c5",
 		Env: []string{
 			"MONGODB_ROOT_PASSWORD=admin",
 			"MONGODB_ADVERTISED_HOSTNAME=localhost",
@@ -99,10 +100,11 @@ func MongoContainerRunner(m *testing.M) {
 		if err != nil {
 			return err
 		}
-		// try to find a document added in init-mongo file
+		// Wait for the final seeded document so tests do not start
+		// while init-mongo.js is still inserting data.
 		db := dbClient.Database("catalogHistory")
 		coll := db.Collection("updates")
-		_, err = coll.FindOne(context.TODO(), bson.D{{Key: "_id", Value: "123"}}).Raw()
+		_, err = coll.FindOne(context.TODO(), bson.D{{Key: "_id", Value: "113"}}).Raw()
 		return err
 	})
 	if err != nil {
