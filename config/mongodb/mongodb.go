@@ -15,17 +15,28 @@ import (
 func ConnectionString() string {
 	var connectionString strings.Builder
 	connectionString.WriteString("mongodb://")
-	connectionString.WriteString(env.MongoUsername())
-	connectionString.WriteString(":")
-	connectionString.WriteString(env.MongoPassword())
-	connectionString.WriteString("@")
+	if env.MongoUsername() != "" {
+		connectionString.WriteString(env.MongoUsername())
+		connectionString.WriteString(":")
+		connectionString.WriteString(env.MongoPassword())
+		connectionString.WriteString("@")
+	}
 	connectionString.WriteString(env.MongoHost())
 	connectionString.WriteString("/")
 	connectionString.WriteString(env.ConstantValues.MongoDatabase)
-	connectionString.WriteString("?authSource=")
-	connectionString.WriteString(env.MongoAuthSource())
-	connectionString.WriteString("&replicaSet=")
-	connectionString.WriteString(env.MongoReplicaSet())
+	if env.MongoUsername() != "" {
+		connectionString.WriteString("?authSource=")
+		connectionString.WriteString(env.MongoAuthSource())
+	}
+	if env.MongoReplicaSet() != "" {
+		if strings.Contains(connectionString.String(), "?") {
+			connectionString.WriteString("&")
+		} else {
+			connectionString.WriteString("?")
+		}
+		connectionString.WriteString("replicaSet=")
+		connectionString.WriteString(env.MongoReplicaSet())
+	}
 
 	return connectionString.String()
 }
