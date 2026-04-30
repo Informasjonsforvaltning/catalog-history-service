@@ -3,10 +3,13 @@ package test
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
+	"strings"
 	"testing"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -50,36 +53,38 @@ func MongoContainerRunner(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
+	pool.MaxWait = 3 * time.Minute
 
-	currentDirectory, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Could not get directory: %s", err)
-	}
+	var resource *dockertest.Resource
+	mongoPortSpec := "27017/tcp"
+	for i := 0; i < 3; i++ {
+		selectedHostPort := "27017"
+		mongoPortSpec = selectedHostPort + "/tcp"
 
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "bitnami/mongodb",
-		Tag:        "latest",
-		Env: []string{
-			"MONGODB_ROOT_PASSWORD=admin",
-			"MONGODB_ADVERTISED_HOSTNAME=localhost",
-			"MONGODB_REPLICA_SET_MODE=primary",
-			"MONGODB_REPLICA_SET_KEY=replicaset",
-		},
-		ExposedPorts: []string{"27017"},
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"27017": {{HostIP: "127.0.0.1", HostPort: "27017"}},
-		},
-		Mounts: []string{
-			currentDirectory + "/init-mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro",
-		},
-	}, func(config *docker.HostConfig) {
-		// set AutoRemove to true so that stopped container is automatically removed
-		config.AutoRemove = true
-		config.RestartPolicy = docker.RestartPolicy{
-			Name: "no",
+		resource, err = pool.RunWithOptions(&dockertest.RunOptions{
+			Repository:   "mongo",
+			Tag:          "8.0",
+			Env:          []string{"MONGO_INITDB_DATABASE=catalogHistory"},
+			Cmd:          []string{"--replSet", "rs0", "--bind_ip_all"},
+			ExposedPorts: []string{"27017"},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				docker.Port(mongoPortSpec): {{HostIP: "127.0.0.1", HostPort: selectedHostPort}},
+			},
+		}, func(config *docker.HostConfig) {
+			// set AutoRemove to true so that stopped container is automatically removed
+			config.AutoRemove = true
+			config.RestartPolicy = docker.RestartPolicy{
+				Name: "no",
+			}
+		})
+		if err == nil {
+			break
 		}
-	})
-	if err != nil {
+		if strings.Contains(err.Error(), "address already in use") && i < 2 {
+			log.Printf("MongoDB test container failed to bind port, retrying startup: %v", err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
@@ -87,22 +92,68 @@ func MongoContainerRunner(m *testing.M) {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
+	seeded := false
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 	err = pool.Retry(func() error {
 		var err error
+		containerInfo, inspectErr := pool.Client.InspectContainer(resource.Container.ID)
+		if inspectErr == nil && containerInfo != nil && !containerInfo.State.Running {
+			return fmt.Errorf("mongodb container stopped: exitCode=%d error=%s", containerInfo.State.ExitCode, containerInfo.State.Error)
+		}
+
+		hostPort := strings.Replace(resource.GetHostPort(mongoPortSpec), "localhost", "127.0.0.1", 1)
+		log.Printf("Using MongoDB test host port: %s", hostPort)
+		_ = os.Setenv("MONGO_HOST", hostPort)
+		_ = os.Setenv("MONGO_USERNAME", "")
+		_ = os.Setenv("MONGO_PASSWORD", "")
+		_ = os.Setenv("MONGODB_REPLICASET", "rs0")
 		dbClient, err = mongo.Connect(
 			context.TODO(),
 			options.Client().ApplyURI(
-				"mongodb://root:admin@localhost:27017",
+				"mongodb://" + hostPort + "/?directConnection=true",
 			),
 		)
 		if err != nil {
 			return err
 		}
-		// try to find a document added in init-mongo file
+
+		admin := dbClient.Database("admin")
+		rsInitiateCmd := bson.D{
+			{Key: "replSetInitiate", Value: bson.D{
+				{Key: "_id", Value: "rs0"},
+				{Key: "members", Value: bson.A{
+					bson.D{
+						{Key: "_id", Value: 0},
+						{Key: "host", Value: hostPort},
+					},
+				}},
+			}},
+		}
+		if cmdErr := admin.RunCommand(context.TODO(), rsInitiateCmd).Err(); cmdErr != nil &&
+			!strings.Contains(cmdErr.Error(), "already initialized") &&
+			!strings.Contains(cmdErr.Error(), "already been initiated") {
+			return cmdErr
+		}
+
+		hello := bson.D{{Key: "hello", Value: 1}}
+		var helloResp bson.M
+		if helloErr := admin.RunCommand(context.TODO(), hello).Decode(&helloResp); helloErr != nil {
+			return helloErr
+		}
+		if isWritablePrimary, ok := helloResp["isWritablePrimary"].(bool); !ok || !isWritablePrimary {
+			return fmt.Errorf("replica set not primary yet")
+		}
+
 		db := dbClient.Database("catalogHistory")
 		coll := db.Collection("updates")
-		_, err = coll.FindOne(context.TODO(), bson.D{{Key: "_id", Value: "123"}}).Raw()
+		if !seeded {
+			if seedErr := seedUpdates(context.TODO(), coll); seedErr != nil {
+				return seedErr
+			}
+			seeded = true
+		}
+
+		_, err = coll.FindOne(context.TODO(), bson.D{{Key: "_id", Value: "113"}}).Raw()
 		return err
 	})
 	if err != nil {
@@ -123,4 +174,84 @@ func MongoContainerRunner(m *testing.M) {
 	}
 
 	os.Exit(code)
+}
+
+func seedUpdates(ctx context.Context, coll *mongo.Collection) error {
+	updates := []interface{}{
+		bson.M{
+			"_id":        "123",
+			"catalogId":  "111222333",
+			"resourceId": "123456789",
+			"person": bson.M{
+				"id":    "123",
+				"email": "example@example.com",
+				"name":  "John Doe",
+			},
+			"datetime": time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			"operations": bson.A{
+				bson.M{"op": "replace", "path": "/name", "value": "Jane"},
+				bson.M{"op": "remove", "path": "/height"},
+				bson.M{"op": "add", "path": "/name", "value": "Jane Test"},
+			},
+		},
+		bson.M{
+			"_id":        "789",
+			"catalogId":  "111222333",
+			"resourceId": "123456789",
+			"person": bson.M{
+				"id":    "789",
+				"email": "example3@example.com",
+				"name":  "Joe Doe",
+			},
+			"datetime": time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
+			"operations": bson.A{
+				bson.M{"op": "add", "path": "/name", "value": "Joe"},
+			},
+		},
+		bson.M{
+			"_id":        "456",
+			"catalogId":  "111222333",
+			"resourceId": "123456789",
+			"person": bson.M{
+				"id":    "456",
+				"email": "example2@example.com",
+				"name":  "Sarah Doe",
+			},
+			"datetime": time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
+			"operations": bson.A{
+				bson.M{"op": "replace", "path": "/name", "value": "Sarah"},
+			},
+		},
+		bson.M{
+			"_id":        "012",
+			"catalogId":  "111222333",
+			"resourceId": "123456789",
+			"person": bson.M{
+				"id":    "012",
+				"email": "example4@example.com",
+				"name":  "Bob Doe",
+			},
+			"datetime": time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
+			"operations": bson.A{
+				bson.M{"op": "replace", "path": "/name", "value": "Bob"},
+			},
+		},
+		bson.M{
+			"_id":        "113",
+			"catalogId":  "123456789",
+			"resourceId": "112",
+			"person": bson.M{
+				"id":    "110",
+				"email": "example@example.com",
+				"name":  "Doe Doe",
+			},
+			"datetime": time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
+			"operations": bson.A{
+				bson.M{"op": "replace", "path": "/name", "value": "Bob"},
+			},
+		},
+	}
+
+	_, err := coll.InsertMany(ctx, updates)
+	return err
 }
