@@ -1,6 +1,6 @@
 db = db.getSiblingDB('catalogHistory');
 db.createCollection('updates');
-db.updates.insert(
+db.updates.insertMany([
     {
         "_id": "123",
         "catalogId": "111222333",
@@ -27,10 +27,7 @@ db.updates.insert(
                 "value": "Jane Test"
             }
         ]
-    }
-);
-
-db.updates.insert(
+    },
     {
         "_id": "789",
         "catalogId": "111222333",
@@ -48,10 +45,7 @@ db.updates.insert(
                 "value": "Joe"
             }
         ]
-    }
-);
-
-db.updates.insert(
+    },
     {
         "_id": "456",
         "catalogId": "111222333",
@@ -69,10 +63,7 @@ db.updates.insert(
                 "value": "Sarah"
             }
         ]
-    }
-);
-
-db.updates.insert(
+    },
     {
         "_id": "012",
         "catalogId": "111222333",
@@ -90,10 +81,7 @@ db.updates.insert(
                 "value": "Bob"
             }
         ]
-    }
-);
-
-db.updates.insert(
+    },
     {
         "_id": "113",
         "catalogId": "123456789",
@@ -112,4 +100,4 @@ db.updates.insert(
             }
         ]
     }
-);
+]);
