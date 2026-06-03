@@ -6,12 +6,12 @@ import (
 )
 
 type Update struct {
-	ID         string               `bson:"_id" json:"id"`
-	CatalogId  string               `bson:"catalogId" json:"catalogId"`
-	ResourceId string               `bson:"resourceId" json:"resourceId"`
-	Person     Person               `bson:"person" json:"person"`
-	DateTime   time.Time            `bson:"datetime" json:"datetime"`
-	Operations []JsonPatchOperation `bson:"operations" json:"operations"`
+	ID         string               `json:"id"`
+	CatalogId  string               `json:"catalogId"`
+	ResourceId string               `json:"resourceId"`
+	Person     Person               `json:"person"`
+	DateTime   time.Time            `json:"datetime"`
+	Operations []JsonPatchOperation `json:"operations"`
 }
 
 type UpdatePayload struct {
@@ -27,24 +27,24 @@ func (update UpdatePayload) Validate() error {
 }
 
 type Updates struct {
-	Updates 	[]Update 	`json:"updates"`
-	Pagination 	Pagination 	`json:"pagination"`
+	Updates    []Update   `json:"updates"`
+	Pagination Pagination `json:"pagination"`
 }
 
-type Pagination struct {	
-	TotalPages 	int `json:"totalPages"`
-	Page 		int `json:"page"`
-	Size 		int `json:"size"`
+type Pagination struct {
+	TotalPages int `json:"totalPages"`
+	Page       int `json:"page"`
+	Size       int `json:"size"`
 }
 
 type Person struct {
-	ID    string `bson:"id" json:"id"`
-	Email string `bson:"email" json:"email"`
-	Name  string `bson:"name" json:"name"`
+	ID    string `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
 }
 
 type JsonPatchOperation struct {
-	Op    string `bson:"op" json:"op"`
-	Path  string `bson:"path" json:"path"`
-	Value any    `bson:"value" json:"value"`
+	Op    string `json:"op"`
+	Path  string `json:"path"`
+	Value any    `json:"value"`
 }

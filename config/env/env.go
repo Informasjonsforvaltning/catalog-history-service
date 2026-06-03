@@ -16,34 +16,28 @@ func CorsOriginPatterns() []string {
 	return strings.Split(getEnv("CORS_ORIGIN_PATTERNS", "*"), ",")
 }
 
-func MongoHost() string {
-	return getEnv("MONGO_HOST", "localhost:27017")
+func PostgresHost() string {
+	return getEnv("POSTGRESQL_HOST", "localhost")
 }
 
-func MongoPassword() string {
-	return getEnv("MONGO_PASSWORD", "admin")
+func PostgresPort() string {
+	return getEnv("POSTGRESQL_PORT", "5432")
 }
 
-func MongoUsername() string {
-	return getEnv("MONGO_USERNAME", "root")
+func PostgresDB() string {
+	return getEnv("POSTGRESQL_DB", "catalog_history")
 }
 
-func MongoAuthSource() string {
-	return getEnv("MONGODB_AUTH", "admin")
+func PostgresUsername() string {
+	return getEnv("POSTGRESQL_USERNAME", "admin")
 }
 
-func MongoReplicaSet() string {
-	return getEnv("MONGODB_REPLICASET", "replicaset")
+func PostgresPassword() string {
+	return getEnv("POSTGRESQL_PASSWORD", "admin")
 }
 
 func KeycloakHost() string {
 	return getEnv("SSO_BASE_URI", "https://auth.staging.fellesdatakatalog.digdir.no")
-}
-
-type Constants struct {
-	MongoAuthParams string
-	MongoCollection string
-	MongoDatabase   string
 }
 
 type Paths struct {
@@ -61,12 +55,6 @@ type Security struct {
 	AdminPermission string
 	WritePermission string
 	ReadPermission  string
-}
-
-var ConstantValues = Constants{
-	MongoAuthParams: "authSource=admin&authMechanism=SCRAM-SHA-1",
-	MongoCollection: "updates",
-	MongoDatabase:   "catalogHistory",
 }
 
 var PathValues = Paths{

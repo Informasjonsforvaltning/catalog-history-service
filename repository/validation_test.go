@@ -144,14 +144,14 @@ func TestValidateID(t *testing.T) {
 			errType:   ErrInvalidInput,
 		},
 		{
-			name:      "ID with MongoDB operator at start",
+			name:      "ID with operator at start",
 			id:        "$gt",
 			fieldName: "testId",
 			wantErr:   true,
 			errType:   ErrInvalidInput,
 		},
 		{
-			name:      "ID with MongoDB operator in middle",
+			name:      "ID with operator in middle",
 			id:        "test$ne123",
 			fieldName: "testId",
 			wantErr:   true,
@@ -200,22 +200,22 @@ func TestValidateSortField(t *testing.T) {
 		{
 			name:     "valid name field",
 			sortBy:   "name",
-			expected: "person.name",
+			expected: "person_name",
 		},
 		{
 			name:     "valid email field",
 			sortBy:   "email",
-			expected: "person.email",
+			expected: "person_email",
 		},
 		{
 			name:     "valid person.name field",
 			sortBy:   "person.name",
-			expected: "person.name",
+			expected: "person_name",
 		},
 		{
 			name:     "valid person.email field",
 			sortBy:   "person.email",
-			expected: "person.email",
+			expected: "person_email",
 		},
 		{
 			name:     "invalid field defaults to datetime",
@@ -238,7 +238,7 @@ func TestValidateSortField(t *testing.T) {
 			expected: "datetime",
 		},
 		{
-			name:     "MongoDB operator defaults to datetime",
+			name:     "operator defaults to datetime",
 			sortBy:   "$gt",
 			expected: "datetime",
 		},
@@ -259,104 +259,104 @@ func TestValidateSortField(t *testing.T) {
 
 func TestValidatePagination(t *testing.T) {
 	tests := []struct {
-		name        string
-		page        int
-		size        int
-		wantErr     bool
+		name         string
+		page         int
+		size         int
+		wantErr      bool
 		expectedPage int
 		expectedSize int
-		errMsg      string
+		errMsg       string
 	}{
 		{
-			name:        "valid pagination",
-			page:        1,
-			size:        10,
-			wantErr:     false,
+			name:         "valid pagination",
+			page:         1,
+			size:         10,
+			wantErr:      false,
 			expectedPage: 1,
 			expectedSize: 10,
 		},
 		{
-			name:        "valid pagination with max page",
-			page:        10000,
-			size:        10,
-			wantErr:     false,
+			name:         "valid pagination with max page",
+			page:         10000,
+			size:         10,
+			wantErr:      false,
 			expectedPage: 10000,
 			expectedSize: 10,
 		},
 		{
-			name:        "valid pagination with max size",
-			page:        1,
-			size:        100,
-			wantErr:     false,
+			name:         "valid pagination with max size",
+			page:         1,
+			size:         100,
+			wantErr:      false,
 			expectedPage: 1,
 			expectedSize: 100,
 		},
 		{
-			name:        "page below minimum defaults to 1",
-			page:        0,
-			size:        10,
-			wantErr:     false,
-			expectedPage: 1,
+			name:         "page zero is valid",
+			page:         0,
+			size:         10,
+			wantErr:      false,
+			expectedPage: 0,
 			expectedSize: 10,
 		},
 		{
-			name:        "page negative defaults to 1",
-			page:        -1,
-			size:        10,
-			wantErr:     false,
-			expectedPage: 1,
+			name:         "page negative defaults to 0",
+			page:         -1,
+			size:         10,
+			wantErr:      false,
+			expectedPage: 0,
 			expectedSize: 10,
 		},
 		{
-			name:        "size below minimum defaults to 1",
-			page:        1,
-			size:        0,
-			wantErr:     false,
+			name:         "size below minimum defaults to 1",
+			page:         1,
+			size:         0,
+			wantErr:      false,
 			expectedPage: 1,
 			expectedSize: 1,
 		},
 		{
-			name:        "size negative defaults to 1",
-			page:        1,
-			size:        -5,
-			wantErr:     false,
+			name:         "size negative defaults to 1",
+			page:         1,
+			size:         -5,
+			wantErr:      false,
 			expectedPage: 1,
 			expectedSize: 1,
 		},
 		{
-			name:        "page exceeds maximum",
-			page:        10001,
-			size:        10,
-			wantErr:     true,
-			errMsg:      "page cannot exceed 10000",
+			name:    "page exceeds maximum",
+			page:    10001,
+			size:    10,
+			wantErr: true,
+			errMsg:  "page cannot exceed 10000",
 		},
 		{
-			name:        "size exceeds maximum",
-			page:        1,
-			size:        101,
-			wantErr:     true,
-			errMsg:      "size cannot exceed 100",
+			name:    "size exceeds maximum",
+			page:    1,
+			size:    101,
+			wantErr: true,
+			errMsg:  "size cannot exceed 100",
 		},
 		{
-			name:        "both page and size exceed maximum",
-			page:        10001,
-			size:        101,
-			wantErr:     true,
-			errMsg:      "page cannot exceed 10000",
+			name:    "both page and size exceed maximum",
+			page:    10001,
+			size:    101,
+			wantErr: true,
+			errMsg:  "page cannot exceed 10000",
 		},
 		{
-			name:        "large page number",
-			page:        9999,
-			size:        50,
-			wantErr:     false,
+			name:         "large page number",
+			page:         9999,
+			size:         50,
+			wantErr:      false,
 			expectedPage: 9999,
 			expectedSize: 50,
 		},
 		{
-			name:        "large size number",
-			page:        1,
-			size:        99,
-			wantErr:     false,
+			name:         "large size number",
+			page:         1,
+			size:         99,
+			wantErr:      false,
 			expectedPage: 1,
 			expectedSize: 99,
 		},
@@ -378,4 +378,3 @@ func TestValidatePagination(t *testing.T) {
 		})
 	}
 }
-
