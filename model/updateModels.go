@@ -10,7 +10,7 @@ type Update struct {
 	CatalogId  string               `json:"catalogId"`
 	ResourceId string               `json:"resourceId"`
 	Person     Person               `json:"person"`
-	DateTime   time.Time            `json:"datetime"`
+	DateTime   *time.Time           `json:"datetime"`
 	Operations []JsonPatchOperation `json:"operations"`
 }
 

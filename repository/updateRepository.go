@@ -100,13 +100,16 @@ func (r UpdateRepositoryImpl) GetUpdates(ctx context.Context, catalogId string, 
 	for rows.Next() {
 		var u model.Update
 		var opsJSON []byte
-		var dt time.Time
+		var dt *time.Time
 		err := rows.Scan(
 			&u.ID, &u.CatalogId, &u.ResourceId,
 			&u.Person.ID, &u.Person.Email, &u.Person.Name,
 			&dt, &opsJSON,
 		)
-		u.DateTime = dt.UTC()
+		if dt != nil {
+			utc := dt.UTC()
+			u.DateTime = &utc
+		}
 		if err != nil {
 			logrus.Errorf("scan failed: %v", err)
 			logging.LogAndPrintError(err)
@@ -154,7 +157,7 @@ func (r UpdateRepositoryImpl) GetUpdate(ctx context.Context, catalogId string, r
 
 	var u model.Update
 	var opsJSON []byte
-	var dt time.Time
+	var dt *time.Time
 	err := r.pool.QueryRow(ctx,
 		`SELECT id, catalog_id, resource_id, person_id, person_email, person_name, datetime, operations
 		 FROM updates WHERE id = $1 AND catalog_id = $2 AND resource_id = $3`,
@@ -164,7 +167,10 @@ func (r UpdateRepositoryImpl) GetUpdate(ctx context.Context, catalogId string, r
 		&u.Person.ID, &u.Person.Email, &u.Person.Name,
 		&dt, &opsJSON,
 	)
-	u.DateTime = dt.UTC()
+	if dt != nil {
+		utc := dt.UTC()
+		u.DateTime = &utc
+	}
 	if err == pgx.ErrNoRows {
 		logrus.Error("update not found in db")
 		return nil, nil

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS updates (
     person_id     VARCHAR(255) NOT NULL,
     person_email  VARCHAR(255) NOT NULL,
     person_name   VARCHAR(255) NOT NULL,
-    datetime      TIMESTAMPTZ  NOT NULL,
+    datetime      TIMESTAMPTZ,
     operations    JSONB        NOT NULL
 );
 

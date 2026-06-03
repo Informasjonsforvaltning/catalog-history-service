@@ -58,11 +58,12 @@ func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, 
 		logging.LogAndPrintError(err)
 		return "", err
 	}
+	now := time.Now()
 	var updateDbo = model.Update{
 		ID:         uuid.New().String(),
 		CatalogId:  catalogId,
 		ResourceId: resourceId,
-		DateTime:   time.Now(),
+		DateTime:   &now,
 		Person:     update.Person,
 		Operations: update.Operations,
 	}

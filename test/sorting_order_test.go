@@ -31,7 +31,7 @@ func TestPaginationAndSorting(t *testing.T) {
 	assert.Equal(t, 1, actualResponse.Pagination.Page)
 
 	// Check that updates are returned in descending order by date
-	assert.True(t, actualResponse.Updates[0].DateTime.After(actualResponse.Updates[1].DateTime))
+	assert.True(t, actualResponse.Updates[0].DateTime.After(*actualResponse.Updates[1].DateTime))
 }
 
 func TestPaginationAndSortingTwo(t *testing.T) {

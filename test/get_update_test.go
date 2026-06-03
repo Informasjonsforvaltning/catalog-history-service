@@ -23,6 +23,7 @@ func TestGetUpdate(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
+	expectedDateTime := time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)
 	expectedResponse := model.Update{
 		ID:         "113",
 		CatalogId:  "123456789",
@@ -32,7 +33,7 @@ func TestGetUpdate(t *testing.T) {
 			Email: "example@example.com",
 			Name:  "Doe Doe",
 		},
-		DateTime: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
+		DateTime: &expectedDateTime,
 		Operations: []model.JsonPatchOperation{
 			{
 				Op:    "replace",
