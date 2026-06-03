@@ -2,7 +2,9 @@ package postgresql
 
 import (
 	"context"
-	"fmt"
+	"net"
+	"net/url"
+	"strings"
 
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/env"
 	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
@@ -27,13 +29,20 @@ CREATE INDEX IF NOT EXISTS idx_updates_catalog ON updates (catalog_id);
 `
 
 func ConnectionString() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		env.PostgresUsername(),
-		env.PostgresPassword(),
-		env.PostgresHost(),
-		env.PostgresPort(),
-		env.PostgresDB(),
-	)
+	user := strings.TrimSpace(env.PostgresUsername())
+	password := strings.TrimSpace(env.PostgresPassword())
+	host := strings.TrimSpace(env.PostgresHost())
+	port := strings.TrimSpace(env.PostgresPort())
+	db := strings.TrimSpace(env.PostgresDB())
+
+	u := &url.URL{
+		Scheme:   "postgres",
+		User:     url.UserPassword(user, password),
+		Host:     net.JoinHostPort(host, port),
+		Path:     "/" + db,
+		RawQuery: "sslmode=disable",
+	}
+	return u.String()
 }
 
 var pool *pgxpool.Pool
