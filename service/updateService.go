@@ -12,7 +12,6 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/repository"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type UpdateService interface {
@@ -34,7 +33,6 @@ func InitUpdateService() *UpdateServiceImpl {
 }
 
 func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, catalogId string, resourceId string) (string, error) {
-	// Validate input parameters to prevent NoSQL injection
 	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
 		logrus.Errorf("Invalid catalogId: %v", err)
 		logging.LogAndPrintError(err)
@@ -60,11 +58,12 @@ func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, 
 		logging.LogAndPrintError(err)
 		return "", err
 	}
+	now := time.Now()
 	var updateDbo = model.Update{
 		ID:         uuid.New().String(),
 		CatalogId:  catalogId,
 		ResourceId: resourceId,
-		DateTime:   time.Now(),
+		DateTime:   &now,
 		Person:     update.Person,
 		Operations: update.Operations,
 	}
@@ -78,8 +77,6 @@ func (service UpdateServiceImpl) StoreUpdate(ctx context.Context, bytes []byte, 
 }
 
 func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId string, resourceId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
-	// Validate input parameters to prevent NoSQL injection and DoS attacks
-	// Validation errors are client errors, so return 400 Bad Request
 	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
 		logrus.Errorf("Invalid catalogId: %v", err)
 		logging.LogAndPrintError(err)
@@ -91,7 +88,6 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 		return model.Updates{}, http.StatusBadRequest
 	}
 
-	// Validate pagination parameters
 	validatedPage, validatedSize, err := repository.ValidatePagination(page, size)
 	if err != nil {
 		logrus.Errorf("Invalid pagination parameters: %v", err)
@@ -99,32 +95,14 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 		return model.Updates{}, http.StatusBadRequest
 	}
 
-	// Validate and whitelist sort field to prevent injection attacks
-	// Only specific fields are allowed to prevent malicious field names
-	sortByCol := "datetime"
-	switch sortBy {
-	case "name":
-		sortByCol = "person.name"
-	case "email":
-		sortByCol = "person.email"
-	case "datetime":
-		sortByCol = "datetime"
-	// Any other value defaults to "datetime" for safety
-	}
+	sortByCol := repository.ValidateSortField(sortBy)
 
-	// Map sortOrder string to integer value
-	sortOrderInt := -1
+	sortDir := "DESC"
 	if sortOrder == "asc" {
-		sortOrderInt = 1
+		sortDir = "ASC"
 	}
 
-	// Build query using bson.D - values are safely escaped by the MongoDB driver
-	// This prevents NoSQL injection as values are treated as literals, not code
-	query := bson.D{}
-	query = append(query, bson.E{Key: "catalogId", Value: catalogId})
-	query = append(query, bson.E{Key: "resourceId", Value: resourceId})
-
-	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, query, validatedPage, validatedSize, sortByCol, sortOrderInt)
+	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, catalogId, &resourceId, validatedPage, validatedSize, sortByCol, sortDir)
 	if err != nil {
 		logrus.Error("Get updates failed")
 		logging.LogAndPrintError(err)
@@ -137,7 +115,6 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 		return model.Updates{Updates: []model.Update{}, Pagination: pagination}, http.StatusOK
 	} else {
 		logrus.Debug("Returning updates")
-		// Use validated size for accurate pagination calculation
 		totalPages := int(math.Ceil(float64(count) / float64(validatedSize)))
 		pagination := model.Pagination{TotalPages: totalPages, Page: validatedPage, Size: validatedSize}
 		return model.Updates{Updates: databaseUpdates, Pagination: pagination}, http.StatusOK
@@ -145,8 +122,6 @@ func (service UpdateServiceImpl) GetUpdates(ctx context.Context, catalogId strin
 }
 
 func (service UpdateServiceImpl) GetUpdate(ctx context.Context, catalogId string, resourceId string, updateId string) (*model.Update, int) {
-	// Validate input parameters to prevent NoSQL injection
-	// Validation errors are client errors, so return 400 Bad Request
 	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
 		logrus.Errorf("Invalid catalogId: %v", err)
 		logging.LogAndPrintError(err)
@@ -177,14 +152,12 @@ func (service UpdateServiceImpl) GetUpdate(ctx context.Context, catalogId string
 }
 
 func (service UpdateServiceImpl) GetConceptUpdates(ctx context.Context, catalogId string, page int, size int, sortBy string, sortOrder string) (model.Updates, int) {
-	// Validate catalogId to prevent NoSQL injection
 	if err := repository.ValidateID(catalogId, "catalogId"); err != nil {
 		logrus.Errorf("Invalid catalogId: %v", err)
 		logging.LogAndPrintError(err)
 		return model.Updates{}, http.StatusBadRequest
 	}
 
-	// Validate pagination parameters
 	validatedPage, validatedSize, err := repository.ValidatePagination(page, size)
 	if err != nil {
 		logrus.Errorf("Invalid pagination parameters: %v", err)
@@ -192,27 +165,14 @@ func (service UpdateServiceImpl) GetConceptUpdates(ctx context.Context, catalogI
 		return model.Updates{}, http.StatusBadRequest
 	}
 
-	// Validate and whitelist sort field to prevent injection attacks
-	sortByCol := "datetime"
-	switch sortBy {
-	case "name":
-		sortByCol = "person.name"
-	case "email":
-		sortByCol = "person.email"
-	case "datetime":
-		sortByCol = "datetime"
-	}
+	sortByCol := repository.ValidateSortField(sortBy)
 
-	// Map sortOrder string to integer value
-	sortOrderInt := -1
+	sortDir := "DESC"
 	if sortOrder == "asc" {
-		sortOrderInt = 1
+		sortDir = "ASC"
 	}
 
-	// Build query with catalogId only (no resourceId filter)
-	query := bson.D{{Key: "catalogId", Value: catalogId}}
-
-	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, query, validatedPage, validatedSize, sortByCol, sortOrderInt)
+	databaseUpdates, count, err := service.UpdateRepository.GetUpdates(ctx, catalogId, nil, validatedPage, validatedSize, sortByCol, sortDir)
 	if err != nil {
 		logrus.Error("Get concept updates failed")
 		logging.LogAndPrintError(err)
