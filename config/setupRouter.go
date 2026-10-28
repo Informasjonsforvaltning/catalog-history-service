@@ -4,6 +4,7 @@ import (
 	"github.com/Informasjonsforvaltning/catalog-history-service/config/security"
 	"github.com/Informasjonsforvaltning/catalog-history-service/logging"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"time"
 
@@ -31,6 +32,7 @@ func SetupRouter() *gin.Engine {
 	router.RedirectTrailingSlash = false
 	router.RemoveExtraSlash = false
 	router.Use(gin.Recovery())
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     env.CorsOriginPatterns(),
 		AllowMethods:     []string{"OPTIONS", "GET", "POST"},
