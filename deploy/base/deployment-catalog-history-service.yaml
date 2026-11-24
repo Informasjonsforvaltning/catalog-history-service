@@ -11,7 +11,10 @@ spec:
     matchLabels:
       app: catalog-history-service
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -20,10 +23,17 @@ spec:
         prometheus.io/scrape: "false"
     spec:
       serviceAccountName: error-reporting-sa
+      # Must exceed the preStop sleep.
+      terminationGracePeriodSeconds: 45
       containers:
         - name: catalog-history-service
           image: catalog-history-service
           imagePullPolicy: Always
+          # Keep accepting connections until the endpoint is detached from the NEG.
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 30
           ports:
             - containerPort: 8080
           livenessProbe:
